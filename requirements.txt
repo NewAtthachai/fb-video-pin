@@ -1,0 +1,10 @@
+fastapi>=0.115.0
+uvicorn>=0.30.0
+watchfiles>=1.0.0
+python-multipart>=0.0.9
+playwright>=1.45.0
+pydantic>=2.7.0
+pillow>=10.3.0
+uharfbuzz>=0.40.0
+edge-tts>=7.0.0
+aiohttp>=3.9.0

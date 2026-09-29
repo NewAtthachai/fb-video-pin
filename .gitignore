@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+
+# Configuration and Sensitive Data (IMPORTANT: Protect API Keys & Queue Data)
+data/config.json
+data/queue.json
+data/screenshots/
+.env
+.env.*
+
+# Browser profiles and user sessions (Contains Chrome login sessions, cookies, tokens)
+browser_profiles/
+browser_profile/
+
+# Uploads & Temporary Media (Keep directory structure but exclude user videos & images)
+uploads/*
+!uploads/.gitkeep
+uploads/ai_clips/*
+uploads/ai_images/*
+uploads/temp_images/*
+uploads/thumbnails/*
+# Video, Audio, and Image outputs (except bundled assets and samples)
+*.mp4
+*.wav
+*.m4a
+*.jpg
+*.jpeg
+*.png
+*.webp
+!assets/**
+!static/**
+
+# Temporary / Scratch Test Scripts
+scratch_test_*.py
+test_*.py
+test_*.jpg
+test_*.png
+test_*.mp3
+test_*.mp4
+
+# Operating System & Editor Files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

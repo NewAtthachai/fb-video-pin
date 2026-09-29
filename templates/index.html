@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Platform Video Auto-Poster (FB Reels / TikTok / YouTube Shorts)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .log-terminal::-webkit-scrollbar { width: 6px; }
+        .log-terminal::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- Top Navigation -->
+    <header class="border-b border-slate-800 bg-slate-950/85 backdrop-blur sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-pink-500 to-red-500 flex items-center justify-center shadow-lg shadow-pink-500/20">
+                    <i data-lucide="share-2" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-blue-400 via-pink-400 to-rose-400 bg-clip-text text-transparent">
+                        Multi-Platform Auto-Poster & ปักตะกร้า
+                    </h1>
+                    <div class="flex items-center space-x-2 text-xs text-slate-400">
+                        <span class="inline-flex items-center text-blue-400 font-medium"><i data-lucide="facebook" class="w-3 h-3 mr-1"></i> FB Reels</span>
+                        <span>•</span>
+                        <span class="inline-flex items-center text-pink-400 font-medium"><i data-lucide="music-2" class="w-3 h-3 mr-1"></i> TikTok</span>
+                        <span>•</span>
+                        <span class="inline-flex items-center text-rose-400 font-medium"><i data-lucide="play-square" class="w-3 h-3 mr-1"></i> YT Shorts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login & Control Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Dropdown or login buttons -->
+                <div class="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/70">
+                    <span class="text-xs text-slate-400 px-2 flex items-center"><i data-lucide="key" class="w-3.5 h-3.5 mr-1 text-amber-400"></i> ล็อกอิน:</span>
+                    <button onclick="openLogin('facebook')" title="เข้าสู่ระบบ Facebook" class="px-2.5 py-1.5 hover:bg-blue-600/30 text-blue-400 rounded-lg text-xs font-medium flex items-center space-x-1 transition">
+                        <i data-lucide="facebook" class="w-3.5 h-3.5"></i>
+                        <span>Facebook</span>
+                    </button>
+                    <button onclick="openLogin('tiktok')" title="เข้าสู่ระบบ TikTok" class="px-2.5 py-1.5 hover:bg-pink-600/30 text-pink-400 rounded-lg text-xs font-medium flex items-center space-x-1 transition">
+                        <i data-lucide="music-2" class="w-3.5 h-3.5"></i>
+                        <span>TikTok</span>
+                    </button>
+                    <button onclick="openLogin('youtube')" title="เข้าสู่ระบบ YouTube" class="px-2.5 py-1.5 hover:bg-rose-600/30 text-rose-400 rounded-lg text-xs font-medium flex items-center space-x-1 transition">
+                        <i data-lucide="youtube" class="w-3.5 h-3.5"></i>
+                        <span>YouTube</span>
+                    </button>
+                </div>
+
+                <button id="btn-start" onclick="startQueue()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-medium flex items-center space-x-2 transition shadow-lg shadow-emerald-600/25">
+                    <i data-lucide="play" class="w-4 h-4"></i>
+                    <span>เริ่มโพสต์คิว</span>
+                </button>
+                <button id="btn-stop" onclick="stopQueue()" class="hidden px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-sm font-medium flex items-center space-x-2 transition shadow-lg shadow-rose-600/25">
+                    <i data-lucide="square" class="w-4 h-4"></i>
+                    <span>หยุดคิว</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+        <!-- Status Overview Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400">คลิปในคิวทั้งหมด</p>
+                    <p id="stat-total" class="text-2xl font-bold text-white mt-1">0</p>
+                </div>
+                <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
+                    <i data-lucide="layers" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400">รอโพสต์</p>
+                    <p id="stat-pending" class="text-2xl font-bold text-amber-400 mt-1">0</p>
+                </div>
+                <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400">โพสต์สำเร็จครบ</p>
+                    <p id="stat-completed" class="text-2xl font-bold text-emerald-400 mt-1">0</p>
+                </div>
+                <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+                    <i data-lucide="check-circle" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-400">สถานะระบบ</p>
+                    <div id="stat-status" class="flex items-center space-x-2 mt-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                        <span class="text-sm font-semibold text-slate-300">พร้อมใช้งาน</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-700/30 text-slate-400 rounded-xl">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex border-b border-slate-800 space-x-6 text-sm font-medium">
+            <button onclick="switchTab('queue')" id="tab-btn-queue" class="pb-3 border-b-2 border-blue-500 text-blue-400 flex items-center space-x-2">
+                <i data-lucide="list-ordered" class="w-4 h-4"></i>
+                <span>คิวโพสต์คลิป (<span id="tab-queue-count">0</span>)</span>
+            </button>
+            <button onclick="switchTab('ai')" id="tab-btn-ai" class="pb-3 border-b-2 border-transparent text-purple-400 hover:text-purple-300 flex items-center space-x-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+                <span class="font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">🎬 สตูดิโอคลิปขายสินค้า</span>
+                <span class="px-1.5 py-0.2 text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full">เดิม</span>
+            </button>
+            <button onclick="switchTab('origin')" id="tab-btn-origin" class="pb-3 border-b-2 border-transparent text-amber-400 hover:text-amber-300 flex items-center space-x-2">
+                <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
+                <span class="font-bold bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">🧠 สารคดีสั้น & ต้นกำเนิด</span>
+                <span class="px-1.5 py-0.2 text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full font-semibold animate-pulse">ใหม่/แนะนำ</span>
+            </button>
+            <button onclick="switchTab('images')" id="tab-btn-images" class="pb-3 border-b-2 border-transparent text-emerald-400 hover:text-emerald-300 flex items-center space-x-2">
+                <i data-lucide="palette" class="w-4 h-4 text-emerald-400"></i>
+                <span class="font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">🎨 AI วาดภาพ (Gen รูป)</span>
+                <span class="px-1.5 py-0.2 text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full font-semibold">2-3 ภาพ</span>
+            </button>
+            <button onclick="switchTab('add')" id="tab-btn-add" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>เพิ่มคลิปใหม่</span>
+            </button>
+            <button onclick="switchTab('batch')" id="tab-btn-batch" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+                <i data-lucide="folder-input" class="w-4 h-4"></i>
+                <span>นำเข้าทั้งโฟลเดอร์</span>
+            </button>
+            <button onclick="switchTab('settings')" id="tab-btn-settings" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+                <span>ตั้งค่าระบบ</span>
+            </button>
+        </div>
+
+        <!-- TAB CONTENT: QUEUE -->
+        <div id="tab-queue" class="space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-base font-semibold text-slate-200">รายการคลิปที่เตรียมโพสต์</h2>
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearCompleted()" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
+                        ล้างคลิปที่เสร็จแล้ว
+                    </button>
+                    <button onclick="loadQueue()" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition">
+                        รีเฟรช
+                    </button>
+                </div>
+            </div>
+
+            <!-- Queue Table -->
+            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950/60 text-xs uppercase text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="px-5 py-3">วิดีโอ</th>
+                                <th class="px-5 py-3">แพลตฟอร์มปลายทาง</th>
+                                <th class="px-5 py-3">คำบรรยาย (แคปชั่น)</th>
+                                <th class="px-5 py-3">ตะกร้าสินค้า / ลิงก์</th>
+                                <th class="px-5 py-3">สถานะโดยรวม</th>
+                                <th class="px-5 py-3 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-table-body" class="divide-y divide-slate-800/60">
+                            <!-- Injected by JavaScript -->
+                            <tr>
+                                <td colspan="6" class="px-5 py-10 text-center text-slate-500">
+                                    ยังไม่มีคลิปในคิว กรุณาไปที่แท็บ "เพิ่มคลิปใหม่" หรือ "นำเข้าทั้งโฟลเดอร์"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: AI VIDEO STUDIO -->
+        <div id="tab-ai" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Column: AI Generator Form (7 cols) -->
+                <div class="lg:col-span-7 bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2.5 bg-gradient-to-tr from-purple-600 to-pink-600 text-white rounded-xl shadow-lg shadow-purple-600/30">
+                                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                                    <span>สตูดิโอสร้างคลิปด้วย AI</span>
+                                    <span class="px-2 py-0.5 text-[11px] font-semibold bg-pink-500/20 text-pink-400 border border-pink-500/30 rounded-full">AI Video Maker</span>
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">สร้างคลิป 9:16 สไตล์ TikTok / Reels พร้อมเสียงพากย์ไทยและแคปชั่น พร้อมส่งเข้าคิวโพสต์ได้ทันที</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gemini API Key Quick Settings Bar (สำหรับคุณหรือเพื่อนปรับเปลี่ยนคีย์ได้ทันที) -->
+                    <div class="p-3 bg-purple-950/30 border border-purple-800/40 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-purple-300 flex items-center">
+                                <i data-lucide="key" class="w-3.5 h-3.5 mr-1.5 text-purple-400"></i>
+                                Google Gemini API Key:
+                            </span>
+                            <span id="ai-key-status" class="text-[11px] px-2 py-0.5 rounded-full {{ 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' if config.gemini_api_key else 'bg-slate-800 text-slate-400 border border-slate-700' }}">
+                                {{ '✅ เชื่อมต่อ Gemini API แล้ว' if config.gemini_api_key else '⚡ ระบบสคริปต์อัตโนมัติในตัว (ฟรี)' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="password" id="ai-tab-gemini-key" value="{{ config.gemini_api_key or '' }}" placeholder="วางคีย์ AIzaSy... ที่นี่เพื่อเปลี่ยนคีย์ได้ตลอดเวลา" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+                            <button type="button" onclick="quickSaveGeminiKey()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition whitespace-nowrap">
+                                💾 บันทึกคีย์
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-400">💡 คุณหรือเพื่อนสามารถนำคีย์ฟรีจาก <a href="https://aistudio.google.com" target="_blank" class="text-purple-400 underline">Google AI Studio</a> มาวางตรงนี้เพื่อสลับคีย์ได้ทันที</p>
+                    </div>
+
+                    <form id="ai-generator-form" onsubmit="event.preventDefault();" class="space-y-4">
+                        <!-- Product Name -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-200 mb-1">
+                                ชื่อสินค้า หรือเรื่องที่ต้องการทำคลิป <span class="text-rose-400">*</span>
+                            </label>
+                            <input type="text" id="ai-product-name" required placeholder="เช่น พัดลมพกพามินิ ลมแรง แบตเตอรี่อึด หรือ เซรั่มหน้าใสลดสิว" 
+                                class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+                        </div>
+
+                        <!-- Selling Points -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-200 mb-1">
+                                จุดเด่น / สรรพคุณสินค้า (คั่นด้วยจุลภาค ,)
+                            </label>
+                            <input type="text" id="ai-product-details" placeholder="เช่น ลมแรง 5 ระดับ, แบต 4000mAh ใช้ได้ทั้งวัน, น้ำหนักเบา พกพาง่าย, ชาร์จไว Type-C" 
+                                class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+                            <p class="text-[11px] text-slate-400 mt-1">💡 ยิ่งใส่จุดเด่นชัดเจน AI จะยิ่งเขียนสคริปต์และสร้างการ์ดกราฟิกได้น่าสนใจ</p>
+                        </div>
+
+                        <!-- Product Link -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-200 mb-1">
+                                พิกัดสินค้า / ลิงก์ตะกร้า (Shopee / Lazada / TikTok Shop)
+                            </label>
+                            <input type="text" id="ai-product-link" placeholder="เช่น https://s.shopee.co.th/xxx หรือ ลิงก์ร้านค้าของคุณ" 
+                                class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <!-- Style & Voice Selector (Grid 2 cols) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-200 mb-1">สไตล์คลิปและอารมณ์</label>
+                                <select id="ai-style" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                    <option value="viral_hook">🔥 สายป้ายยาเร้าใจ (Viral Hook)</option>
+                                    <option value="review_friendly">✨ รีวิวจริงใจบอกต่อ (Honest Review)</option>
+                                    <option value="top_3">⭐ สรุป 3 เหตุผลที่ต้องมี (Top 3)</option>
+                                    <option value="flash_sale">⚡ โปรเด็ดลดแหลก (Flash Sale)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-xs font-semibold text-slate-200">เสียงพากย์ AI (เลือกสไตล์ที่ชอบ)</label>
+                                    <button type="button" onclick="testPlayVoice('ai-voice')" id="btn-test-ai-voice" class="px-2.5 py-0.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 rounded-lg text-[11px] font-semibold flex items-center space-x-1 transition cursor-pointer shadow-sm">
+                                        <i data-lucide="volume-2" class="w-3.5 h-3.5 text-purple-400"></i>
+                                        <span id="btn-test-ai-voice-text">🔊 ฟังตัวอย่างเสียง</span>
+                                    </button>
+                                </div>
+                                <select id="ai-voice" onchange="onVoiceChanged('ai-voice')" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                                    <optgroup label="🌟 เสียง Google Gemini AI (เสียงมนุษย์จริง สมจริงขั้นสุด)">
+                                        <option value="gemini-Aoede">✨ Google Gemini (Aoede - สาวสดใส มีพลัง ชวนฟัง)</option>
+                                        <option value="gemini-Kore">✨ Google Gemini (Kore - สาวหวาน สุภาพ ละมุน)</option>
+                                        <option value="gemini-Charon">✨ Google Gemini (Charon - หนุ่มสุขุม ทุ้ม น่าเชื่อถือ)</option>
+                                        <option value="gemini-Fenrir">✨ Google Gemini (Fenrir - หนุ่มทรงพลัง หนักแน่น)</option>
+                                        <option value="gemini-Puck">✨ Google Gemini (Puck - หนุ่มสดใส มีชีวิตชีวา)</option>
+                                    </optgroup>
+                                    <optgroup label="⚡ เสียงระบบในตัว (Edge Neural - ฟรี ไม่ต้องใช้คีย์)">
+                                        <option value="th-TH-PremwadeeNeural" selected>👩 พรีมวดี (สาวอินฟลูฯ สดใส มีพลัง ป้ายยาสนุก แนะนำ)</option>
+                                        <option value="th-TH-NiwatNeural">👨 นิวัฒน์ (หนุ่มรีวิว สุขุม น่าเชื่อถือ มืออาชีพ)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Voice Speed & BGM Settings -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-slate-900/60 border border-slate-800 rounded-xl">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-300 mb-1">⚡ จังหวะความเร็วพูด</label>
+                                <select id="ai-voice-rate" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200">
+                                    <option value="+4%">ธรรมชาติ ลื่นไหล (+4% แนะนำ)</option>
+                                    <option value="+0%">ปกติ ชัดถ้อยชัดคำ (+0%)</option>
+                                    <option value="+8%">เร้าใจ ดึงดูดสไตล์ TikTok (+8%)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center pt-4">
+                                <label class="flex items-center space-x-2 cursor-pointer text-xs text-purple-300">
+                                    <input type="checkbox" id="ai-enable-bgm" checked class="w-4 h-4 text-purple-600 rounded bg-slate-900 border-slate-700 focus:ring-purple-500">
+                                    <span class="font-medium flex items-center"><i data-lucide="music" class="w-3.5 h-3.5 mr-1 text-purple-400"></i> เปิดเพลงคลอพื้นหลัง (BGM)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Video Format & Studio Theme Selector -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3.5 bg-gradient-to-br from-indigo-950/40 via-purple-950/30 to-slate-900/60 border border-purple-800/50 rounded-xl">
+                            <div>
+                                <label class="block text-[11px] font-bold text-purple-300 mb-1 flex items-center">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1 text-pink-400"></i> รูปแบบวิดีโอ (Video Style)
+                                </label>
+                                <select id="ai-video-style" class="w-full bg-slate-950 border border-purple-700/60 rounded-lg px-2.5 py-2 text-xs text-purple-100 font-medium focus:ring-1 focus:ring-purple-500">
+                                    <option value="presenter" selected>👩 น้องพรีม AI พรีเซนเตอร์ (พูดขยับปาก + กะพริบตา + โยกตัว)</option>
+                                    <option value="cinematic">📦 สตอรี่บอร์ดสินค้า 4 ฉาก (Product Cinematic 4 Acts)</option>
+                                </select>
+                                <span class="text-[10px] text-purple-300/80 block mt-1">✨ ขยับปากตามคลื่นเสียงพูดจริง (Lip-Sync) ในโปรแกรมเรา 100%</span>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-sky-300 mb-1 flex items-center">
+                                    <i data-lucide="palette" class="w-3.5 h-3.5 mr-1 text-sky-400"></i> สตูดิโอฉากหลัง (Studio Theme)
+                                </label>
+                                <select id="ai-bg-theme" class="w-full bg-slate-950 border border-sky-700/60 rounded-lg px-2.5 py-2 text-xs text-sky-100 font-medium focus:ring-1 focus:ring-sky-500">
+                                    <option value="cyber" selected>🔮 Neon Cyber Studio (ห้องไฟนีออนสตรีมเมอร์)</option>
+                                    <option value="luxury">☕ Cozy Luxury Room (ห้องมินิมอลคาเฟ่อบอุ่น)</option>
+                                    <option value="bokeh">✨ Cinematic Bokeh Blur (เบลอฟุ้งไฮเอนด์)</option>
+                                </select>
+                                <span class="text-[10px] text-sky-300/80 block mt-1">🎨 สลับบรรยากาศห้องสตูดิโอและแสงไฟสไตล์โมเดิร์น</span>
+                            </div>
+                        </div>
+
+                        <!-- Product Photos Upload & Storyboard Mode -->
+                        <div class="p-4 bg-slate-900/50 border border-slate-800 rounded-xl space-y-3">
+                            <label class="block text-xs font-semibold text-slate-200 flex items-center justify-between">
+                                <span class="flex items-center"><i data-lucide="image" class="w-4 h-4 mr-1.5 text-purple-400"></i> รูปภาพสินค้า (เลือกได้ 1 ถึง 5 รูป)</span>
+                                <span class="text-[11px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-full">✨ ฟอนต์ Kanit สมัยใหม่ + การ์ดสินค้า</span>
+                            </label>
+                            <input type="file" id="ai-product-images" multiple accept="image/png,image/jpeg,image/webp,image/jpg" 
+                                class="block w-full text-xs text-slate-400
+                                file:mr-3 file:py-2 file:px-3
+                                file:rounded-lg file:border-0
+                                file:text-xs file:font-semibold
+                                file:bg-purple-600/80 file:text-white
+                                hover:file:bg-purple-600
+                                file:cursor-pointer
+                                bg-slate-950/60 border border-slate-700/60 rounded-xl p-1.5 focus:outline-none">
+                            <div class="p-3 bg-slate-950/60 border border-slate-800 rounded-lg space-y-1.5 text-[11px] text-slate-400">
+                                <p class="text-purple-300 font-semibold flex items-center">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1"></i> วิดีโอจะถูกตัดต่อเป็นสตอรี่ 4 ฉากต่อเนื่อง (ไม่ใช่ภาพนิ่ง):
+                                </p>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1 text-[10px]">
+                                    <div class="bg-slate-900 p-1.5 rounded border border-slate-800">1. 🔥 ซูมกระชาก Hook</div>
+                                    <div class="bg-slate-900 p-1.5 rounded border border-slate-800">2. ✨ แพนโชว์สินค้าจริง</div>
+                                    <div class="bg-slate-900 p-1.5 rounded border border-slate-800">3. ⭐ เจาะลึก 3 จุดเด่น</div>
+                                    <div class="bg-slate-900 p-1.5 rounded border border-slate-800">4. 🛒 ซูมออกปักตะกร้า</div>
+                                </div>
+                                <p class="text-[10px] text-slate-500 pt-1">
+                                    💡 โหมดน้องพรีม: ตัวละครจะยืนรีวิวข้างการ์ดสินค้า ขยับปากพูดตามคำจริง พร้อมกะพริบตาและโยกตัวอย่างเป็นธรรมชาติ
+                                </p>
+                            </div>
+
+                            <!-- In-App Presenter Feature Badge -->
+                            <div class="p-3 bg-emerald-950/20 border border-emerald-800/40 rounded-lg space-y-1 text-xs text-emerald-300">
+                                <div class="font-bold flex items-center">
+                                    <i data-lucide="check-circle" class="w-4 h-4 mr-1.5 text-emerald-400"></i> ทำงานในเครื่อง 100% ไม่ต้องเปิดเว็บภายนอก
+                                </div>
+                                <p class="text-[11px] text-slate-300 leading-relaxed">
+                                    เรนเดอร์ด้วยระบบ Audio Amplitude Sync ในตัว ผสานฟอนต์ Google Fonts Kanit-Bold สไตล์ Reels/TikTok ยอดฮิต เรนเดอร์เสร็จกด <strong>"ส่งเข้าคิวโพสต์ทันที"</strong> ได้เลย!
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                            <button type="button" onclick="generateAIScriptOnly()" id="btn-ai-script" 
+                                class="flex-1 py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2">
+                                <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
+                                <span>✨ 1. สร้างสคริปต์ & แคปชั่น</span>
+                            </button>
+
+                            <button type="button" onclick="createAIVideo()" id="btn-ai-render" 
+                                class="flex-1 py-2.5 px-4 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-purple-600/30 flex items-center justify-center space-x-2">
+                                <i data-lucide="video" class="w-4 h-4"></i>
+                                <span>🎥 2. เรนเดอร์วิดีโอทันที</span>
+                            </button>
+                        </div>
+
+                        <!-- Loading Indicator -->
+                        <div id="ai-loading" class="hidden p-4 bg-purple-950/40 border border-purple-800/60 rounded-xl flex items-center space-x-3">
+                            <div class="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                            <span id="ai-loading-text" class="text-xs font-medium text-purple-200">AI กำลังสังเคราะห์เสียงพูดและเรนเดอร์วิดีโอ กรุณารอสักครู่...</span>
+                        </div>
+
+                        <!-- Script Preview / Editor Box (Collapsible / Dynamic) -->
+                        <div id="ai-script-box" class="hidden p-4 bg-slate-900/80 border border-slate-700 rounded-xl space-y-3">
+                            <div class="flex items-center justify-between text-xs text-purple-400 font-semibold border-b border-slate-800 pb-2">
+                                <span class="flex items-center"><i data-lucide="edit-3" class="w-3.5 h-3.5 mr-1.5"></i> สคริปต์และข้อความเสียงพากย์ (แก้ไขได้ตามต้องการ)</span>
+                                <span class="text-[11px] text-slate-500">ปรับแก้ก่อนเรนเดอร์ได้</span>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-0.5">หัวข้อคลิป (Title):</label>
+                                <input type="text" id="ai-preview-title" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-0.5">เนื้อหาเสียงพากย์ AI (Voice Text):</label>
+                                <textarea id="ai-preview-voicetext" rows="3" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg p-2.5 text-xs text-slate-200"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-400 mb-0.5">แคปชั่นและแฮชแท็กโซเชียล (Caption):</label>
+                                <textarea id="ai-preview-caption" rows="3" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg p-2.5 text-xs text-slate-200"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Column: Video Preview & Instant Action "นำไปใช้ได้เลย" (5 cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="play-circle" class="w-4 h-4 text-emerald-400"></i>
+                                <span>ตัวอย่างคลิป (Preview) & นำไปใช้</span>
+                            </h4>
+                            <span id="ai-preview-badge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">รอสร้างคลิป</span>
+                        </div>
+
+                        <!-- Video Player Container (Vertical 9:16 aspect ratio box) -->
+                        <div class="relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800 aspect-[9/16] max-h-[460px] mx-auto flex items-center justify-center">
+                            <!-- Placeholder when no video -->
+                            <div id="ai-video-placeholder" class="text-center p-6 space-y-3">
+                                <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 text-purple-400 flex items-center justify-center mx-auto shadow-inner">
+                                    <i data-lucide="video" class="w-8 h-8"></i>
+                                </div>
+                                <p class="text-xs text-slate-400 font-medium">ยังไม่มีคลิปที่สร้าง<br><span class="text-slate-500 text-[11px]">กรอกข้อมูลด้านซ้ายแล้วกดปุ่ม "เรนเดอร์วิดีโอ"</span></p>
+                            </div>
+
+                            <!-- Real Video Element -->
+                            <video id="ai-video-player" controls class="hidden w-full h-full object-contain bg-black"></video>
+                        </div>
+
+                        <!-- Info bar when video is ready -->
+                        <div id="ai-video-meta" class="hidden p-3 bg-slate-900/60 rounded-xl border border-slate-700/50 flex items-center justify-between text-xs">
+                            <span class="text-slate-300 flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-sky-400"></i> <span id="ai-video-duration">0.0</span> วินาที</span>
+                            <span class="text-emerald-400 font-medium flex items-center"><i data-lucide="check" class="w-3.5 h-3.5 mr-1"></i> พร้อมใช้งาน</span>
+                        </div>
+
+                        <!-- Instant Actions: Send to Queue -->
+                        <div id="ai-actions-box" class="hidden space-y-3 pt-2 border-t border-slate-700/60">
+                            <!-- Platform Checkboxes -->
+                            <div class="space-y-1.5">
+                                <label class="block text-[11px] font-semibold text-slate-300">เลือกแพลตฟอร์มปลายทาง:</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center space-x-1.5 p-2 rounded-lg border border-slate-700 bg-slate-900/80 cursor-pointer text-xs text-blue-400">
+                                        <input type="checkbox" id="ai-plat-fb" value="facebook" checked class="w-3.5 h-3.5 rounded text-blue-600">
+                                        <span>FB Reels</span>
+                                    </label>
+                                    <label class="flex items-center space-x-1.5 p-2 rounded-lg border border-slate-700 bg-slate-900/80 cursor-pointer text-xs text-pink-400">
+                                        <input type="checkbox" id="ai-plat-tt" value="tiktok" checked class="w-3.5 h-3.5 rounded text-pink-600">
+                                        <span>TikTok</span>
+                                    </label>
+                                    <label class="flex items-center space-x-1.5 p-2 rounded-lg border border-slate-700 bg-slate-900/80 cursor-pointer text-xs text-rose-400">
+                                        <input type="checkbox" id="ai-plat-yt" value="youtube" checked class="w-3.5 h-3.5 rounded text-rose-600">
+                                        <span>Shorts</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 1-Click Send to Post Queue -->
+                            <button onclick="sendAIVideoToQueue()" id="btn-ai-send-queue" 
+                                class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                                <span>🚀 ส่งเข้าคิวโพสต์ทันที (Add to Post Queue)</span>
+                            </button>
+
+                            <!-- Download MP4 -->
+                            <a id="ai-download-link" href="#" download class="block text-center py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium border border-slate-700 transition">
+                                💾 ดาวน์โหลดคลิป MP4 ลงเครื่อง
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: ORIGIN STORY (สารคดีสั้น & ต้นกำเนิด) -->
+        <div id="tab-origin" class="hidden space-y-6">
+            <div class="bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-amber-500/30 rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+                <!-- Glowing ambient background -->
+                <div class="absolute -top-32 -right-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 space-y-6">
+                    <!-- Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center space-x-2.5">
+                                <span class="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                                </span>
+                                <h2 class="text-xl font-bold bg-gradient-to-r from-amber-300 via-orange-300 to-yellow-400 bg-clip-text text-transparent">
+                                    สตูดิโอสร้างคลิปสารคดีสั้น & ต้นกำเนิด (Story & Origin Studio)
+                                </h2>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                                เปลี่ยนแนวคลิปจากการขายตรง มาเป็น <span class="text-amber-300 font-medium">เรื่องเล่า / ความลับ / ต้นกำเนิดสุดทึ่ง</span> เปิดด้วยเทคนิคซูมภาพแบบ Cinematic ดึงดูดคนดูให้อยู่จนจบ พร้อมแอบปักตะกร้าของแท้เนียนๆ (Soft-selling)
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                            🌟 เพิ่มยอดวิว & คนติดตาม 3-5x
+                        </span>
+                    </div>
+
+                    <!-- Input Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <!-- Left Form Column -->
+                        <div class="lg:col-span-7 space-y-5">
+                            
+                            <!-- Topic input -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-semibold text-slate-300 flex items-center">
+                                    <i data-lucide="help-circle" class="w-3.5 h-3.5 mr-1.5 text-amber-400"></i>
+                                    หัวข้อ / สิ่งของ / แบรนด์ที่จะเล่าต้นกำเนิด <span class="text-rose-400">*</span>
+                                </label>
+                                <input type="text" id="origin-topic" placeholder="เช่น ยาดม, ชาไทย, บะหมี่กึ่งสำเร็จรูป, กาแฟ, รองเท้าผ้าใบ" 
+                                    class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40">
+                                <div class="flex flex-wrap gap-1.5 pt-1">
+                                    <span class="text-[11px] text-slate-500 mr-1">ตัวอย่างหัวข้อยอดฮิต:</span>
+                                    <button type="button" onclick="document.getElementById('origin-topic').value='ยาดม'; document.getElementById('origin-product-name').value='ยาดมหงส์ไทย'" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-amber-300/80 hover:bg-slate-700">ยาดม</button>
+                                    <button type="button" onclick="document.getElementById('origin-topic').value='ชาไทย'; document.getElementById('origin-product-name').value='ชาตรามือ สูตรต้นตำรับ'" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-amber-300/80 hover:bg-slate-700">ชาไทย</button>
+                                    <button type="button" onclick="document.getElementById('origin-topic').value='บะหมี่กึ่งสำเร็จรูป'; document.getElementById('origin-product-name').value='มาม่าต้มยำกุ้ง'" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-amber-300/80 hover:bg-slate-700">บะหมี่กึ่งสำเร็จรูป</button>
+                                    <button type="button" onclick="document.getElementById('origin-topic').value='กาแฟโบราณ'" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-amber-300/80 hover:bg-slate-700">กาแฟ</button>
+                                </div>
+                            </div>
+
+                            <!-- Story Angle -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-semibold text-slate-300 flex items-center">
+                                    <i data-lucide="compass" class="w-3.5 h-3.5 mr-1.5 text-orange-400"></i>
+                                    มุมมองการเล่าเรื่อง (Story Angle)
+                                </label>
+                                <select id="origin-angle" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500">
+                                    <option value="shocking_origin" selected>🤯 ต้นกำเนิดสุดพีกที่คาดไม่ถึง (สร้างจากความบังเอิญ/ความลับ)</option>
+                                    <option value="evolution">⏳ วิวัฒนาการจากอดีตสู่ปัจจุบัน (จากของโบราณสู่ของฮิตระดับโลก)</option>
+                                    <option value="world_hit">🌍 ทำไมสิ่งนี้ถึงดังไปทั่วโลก? (เจาะลึกความลับที่คนคลั่งไคล้)</option>
+                                    <option value="top_secrets">🔍 3 ความลับที่คุณไม่เคยรู้เกี่ยวกับสิ่งนี้ (เกร็ดน่าทึ่ง)</option>
+                                </select>
+                            </div>
+
+                            <!-- Soft-selling product pin section -->
+                            <div class="p-4 bg-amber-950/20 border border-amber-800/40 rounded-2xl space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-bold text-amber-300 flex items-center">
+                                        <i data-lucide="tag" class="w-4 h-4 mr-1.5 text-amber-400"></i>
+                                        การแอบปักตะกร้าแบบเนียนๆ (Soft-selling)
+                                    </label>
+                                    <span class="text-[11px] text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">เชื่อมโยงตอนท้ายคลิป</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 leading-normal">
+                                    💡 ระบุสินค้าและลิงก์ตะกร้า AI จะผูกเรื่องตอนท้ายคลิปให้เชื่อมโยงกับสินค้าตัวนี้ เช่น ชี้เป้าสูตรต้นตำรับแท้ๆ ให้คนดูอยากกดซื้อโดยไม่รู้สึกรำคาญ (หากไม่ระบุ จะเน้นชวนกดติดตามช่อง)
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-slate-300 mb-1">ชื่อสินค้าที่จะปักตะกร้า (ทางเลือก)</label>
+                                        <input type="text" id="origin-product-name" placeholder="เช่น ยาดมหงส์ไทย, ชาตรามือ" 
+                                            class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-slate-300 mb-1">ลิงก์สินค้า / พิกัดตะกร้า</label>
+                                        <input type="text" id="origin-product-link" placeholder="https://shopee... หรือ TikTok Shop" 
+                                            class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Visual Motion & Voice Style -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center">
+                                        <i data-lucide="clapperboard" class="w-3.5 h-3.5 mr-1 text-sky-400"></i>
+                                        รูปแบบภาพวิดีโอ
+                                    </label>
+                                    <select id="origin-video-style" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                                        <option value="documentary" selected>🎥 ภาพสารคดีซูมเต็มจอ (Ken Burns Zoom & Pan)</option>
+                                        <option value="presenter">👩‍💼 มีผู้บรรยาย AI พูดสดเล่าเรื่อง (มุมล่าง)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block text-xs font-semibold text-slate-300 flex items-center">
+                                            <i data-lucide="mic" class="w-3.5 h-3.5 mr-1 text-emerald-400"></i>
+                                            เสียงผู้บรรยายสารคดี AI
+                                        </label>
+                                        <button type="button" onclick="testPlayVoice('origin-voice')" id="btn-test-origin-voice" class="px-2.5 py-0.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-lg text-[11px] font-semibold flex items-center space-x-1 transition cursor-pointer shadow-sm">
+                                            <i data-lucide="volume-2" class="w-3.5 h-3.5 text-amber-400"></i>
+                                            <span id="btn-test-origin-voice-text">🔊 ฟังตัวอย่างเสียง</span>
+                                        </button>
+                                    </div>
+                                    <select id="origin-voice" onchange="onVoiceChanged('origin-voice')" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                                        <optgroup label="🌟 เสียง Google Gemini AI (แนะนำสำหรับสารคดี - เสียงมนุษย์สมจริง)">
+                                            <option value="gemini-Charon" selected>👨 ชาย: Google Gemini (Charon - สุขุม ทุ้ม นุ่มลึก สไตล์สารคดี แนะนำ!)</option>
+                                            <option value="gemini-Fenrir">👨 ชาย: Google Gemini (Fenrir - ทรงพลัง ชัดเจน หนักแน่น)</option>
+                                            <option value="gemini-Puck">👨 ชาย: Google Gemini (Puck - สดใส มีชีวิตชีวา ชวนติดตาม)</option>
+                                            <option value="gemini-Aoede">👩 หญิง: Google Gemini (Aoede - เล่าเรื่องมีเสน่ห์ ชัดถ้อยชัดคำ)</option>
+                                            <option value="gemini-Kore">👩 หญิง: Google Gemini (Kore - อ่อนหวาน ละมุน สุภาพ)</option>
+                                        </optgroup>
+                                        <optgroup label="⚡ เสียงระบบในตัว (Edge Neural - ฟรี ไม่ต้องใช้คีย์)">
+                                            <option value="th-TH-NiwatNeural">👨 ชาย: นิวัฒน์ (เสียงสุขุม น่าเชื่อถือ สไตล์สารคดี)</option>
+                                            <option value="th-TH-PremwadeeNeural">👩 หญิง: เปรมวดี (เสียงหวาน ชัดเจน ชวนฟัง)</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Image Upload (1-5 images) -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                    <span class="flex items-center">
+                                        <i data-lucide="image" class="w-3.5 h-3.5 mr-1.5 text-pink-400"></i>
+                                        รูปภาพประกอบเรื่องราว / สินค้า (1 - 5 รูป)
+                                    </span>
+                                    <span class="text-[11px] text-slate-500">บอทจะนำมาทำเอฟเฟกต์ซูม Cinematic</span>
+                                </label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="file" id="origin-images" multiple accept="image/*" class="block w-full text-xs text-slate-400
+                                        file:mr-3 file:py-2.5 file:px-4
+                                        file:rounded-xl file:border-0
+                                        file:text-xs file:font-semibold
+                                        file:bg-amber-600 file:text-white
+                                        hover:file:bg-amber-500
+                                        file:cursor-pointer
+                                        bg-slate-950/80 border border-slate-700/80 rounded-xl p-1.5 focus:outline-none">
+                                    <button type="button" onclick="switchTab('images')" title="เปิดแท็บสร้างภาพ AI 2-3 ภาพ" class="shrink-0 px-3 py-2.5 bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition">
+                                        <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+                                        <span>AI วาดรูป</span>
+                                    </button>
+                                </div>
+
+                                <!-- Box for Attached Images (from AI Gen or Files) -->
+                                <div id="origin-attached-images-box" class="hidden p-3 bg-amber-950/20 border border-amber-500/30 rounded-xl space-y-2">
+                                    <div class="flex items-center justify-between text-xs font-semibold text-amber-300">
+                                        <span class="flex items-center">
+                                            <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1.5 text-amber-400"></i>
+                                            รูปภาพที่นำมาใช้ในสารคดี (<span id="origin-attached-count">0</span> รูป):
+                                        </span>
+                                        <button type="button" onclick="clearAttachedOriginImages()" class="text-[11px] text-rose-400 hover:text-rose-300">ล้างรูปภาพทั้งหมด</button>
+                                    </div>
+                                    <div id="origin-attached-thumbnails" class="flex flex-wrap gap-2 pt-1">
+                                        <!-- Thumbnails injected by JS -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Generate Script Button -->
+                            <button type="button" id="btn-origin-script" onclick="generateOriginScriptOnly()" class="w-full py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-sm font-bold flex items-center justify-center space-x-2 transition shadow-lg shadow-amber-600/25">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                <span>✨ ให้ AI คิดสคริปต์สารคดีต้นกำเนิด (Generate Origin Script)</span>
+                            </button>
+
+                            <!-- Loading indicator -->
+                            <div id="origin-loading" class="hidden p-4 bg-slate-900/90 border border-amber-500/40 rounded-xl flex items-center space-x-3 text-amber-300 text-xs">
+                                <span class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></span>
+                                <span id="origin-loading-text">กำลังค้นคว้าประวัติและสร้างสคริปต์ชวนติดตาม...</span>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Script Review & Generation -->
+                        <div class="lg:col-span-5 space-y-4">
+                            <div id="origin-script-box" class="hidden p-5 bg-slate-950/90 border border-slate-800 rounded-2xl space-y-4">
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                                    <span class="text-xs font-bold text-amber-300 flex items-center">
+                                        <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5 text-amber-400"></i>
+                                        สคริปต์สารคดีสั้น & แคปชั่น (แก้ไขได้)
+                                    </span>
+                                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">พร้อมเรนเดอร์</span>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-400 mb-1">ชื่อคลิป (Title):</label>
+                                    <input type="text" id="origin-preview-title" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-slate-200">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-400 mb-1">3 วินาทีแรก (Mystery Hook):</label>
+                                    <input type="text" id="origin-preview-hook" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-amber-300 font-medium">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-400 mb-1">ข้อความเสียงพากย์ทั้งหมด (Voice Text):</label>
+                                    <textarea id="origin-preview-voicetext" rows="4" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200 leading-relaxed"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-medium text-slate-400 mb-1">แคปชั่นโซเชียล + แฮชแท็ก + ลิงก์สินค้า:</label>
+                                    <textarea id="origin-preview-caption" rows="3" class="w-full bg-slate-900 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-200"></textarea>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <button type="button" id="btn-origin-create-video" onclick="createOriginVideo()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/25">
+                                    <i data-lucide="video" class="w-4 h-4"></i>
+                                    <span>🎬 เรนเดอร์คลิปสารคดีสั้น 9:16 (Render Video)</span>
+                                </button>
+                            </div>
+
+                            <!-- Video Result Preview Box -->
+                            <div id="origin-result-box" class="hidden p-5 bg-slate-950/90 border border-amber-500/40 rounded-2xl space-y-4">
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                                    <span class="text-xs font-bold text-emerald-400 flex items-center">
+                                        <i data-lucide="check-circle" class="w-3.5 h-3.5 mr-1.5"></i>
+                                        คลิปสารคดีสั้นสร้างเสร็จแล้ว!
+                                    </span>
+                                    <span id="origin-video-duration" class="text-[11px] text-slate-400">0.0 วินาที</span>
+                                </div>
+
+                                <!-- Video Player Container (Vertical 9:16 aspect ratio box) -->
+                                <div class="relative bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 aspect-[9/16] max-h-[460px] mx-auto flex items-center justify-center shadow-2xl">
+                                    <video id="origin-video-player" controls playsinline class="w-full h-full object-cover bg-black"></video>
+                                </div>
+
+                                <div class="space-y-2 pt-1">
+                                    <!-- Platform check for direct queue -->
+                                    <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1.5">
+                                        <label class="text-[11px] font-semibold text-slate-300 block">เลือกช่องทางที่จะโพสต์:</label>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <label class="flex items-center space-x-1.5 text-xs text-blue-400 cursor-pointer">
+                                                <input type="checkbox" id="origin-post-fb" checked class="rounded bg-slate-800 border-slate-700 text-blue-600">
+                                                <span>FB Reels</span>
+                                            </label>
+                                            <label class="flex items-center space-x-1.5 text-xs text-pink-400 cursor-pointer">
+                                                <input type="checkbox" id="origin-post-tt" checked class="rounded bg-slate-800 border-slate-700 text-pink-600">
+                                                <span>TikTok</span>
+                                            </label>
+                                            <label class="flex items-center space-x-1.5 text-xs text-rose-400 cursor-pointer">
+                                                <input type="checkbox" id="origin-post-yt" checked class="rounded bg-slate-800 border-slate-700 text-rose-600">
+                                                <span>YT Shorts</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" id="btn-origin-send-queue" onclick="sendOriginToQueue()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition shadow-lg shadow-blue-600/25">
+                                        <i data-lucide="send" class="w-4 h-4"></i>
+                                        <span>🚀 ส่งเข้าคิวโพสต์ทันที (Add to Post Queue)</span>
+                                    </button>
+
+                                    <a id="origin-download-link" href="#" download class="block text-center py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium border border-slate-700 transition">
+                                        💾 ดาวน์โหลดคลิป MP4 ลงเครื่อง
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: AI IMAGE GENERATION (2-3 IMAGES) -->
+        <div id="tab-images" class="hidden space-y-6">
+            <div class="bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 border border-emerald-500/30 rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+                <!-- Glowing ambient background -->
+                <div class="absolute -top-32 -right-32 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 space-y-6">
+                    <!-- Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center space-x-2.5">
+                                <span class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                    <i data-lucide="palette" class="w-5 h-5"></i>
+                                </span>
+                                <h2 class="text-xl font-bold bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                                    สตูดิโอ AI วาดภาพประกอบสารคดี & วิดีโอ (AI Image Studio)
+                                </h2>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+                                พิมพ์แค่คำสั้นๆ เช่น <span class="text-emerald-300 font-medium">แก้วน้ำ, กาแฟโบราณ, ยาดม, นาฬิกา</span> AI จะสร้างรูปภาพความละเอียดสูง <span class="text-emerald-300 font-medium">2 - 3 ภาพที่มีมุมมองแตกต่างกัน</span> (องค์ที่ 1: กำเนิด/งานฝีมือ, องค์ที่ 2: มาโครซูม, องค์ที่ 3: ไลฟ์สไตล์) พร้อมปุ่ม <span class="text-amber-300 font-semibold">ส่งตรงไปทำสารคดีสั้นในคลิกเดียว!</span>
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            🎨 FLUX AI & Built-in Engine
+                        </span>
+                    </div>
+
+                    <!-- Input Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <!-- Left Form Column (5 cols) -->
+                        <div class="lg:col-span-5 space-y-5">
+                            
+                            <!-- Topic input -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-semibold text-slate-300 flex items-center">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-emerald-400"></i>
+                                    หัวข้อ / สิ่งของที่ต้องการสร้างภาพ <span class="text-rose-400">*</span>
+                                </label>
+                                <input type="text" id="ai-img-topic" placeholder="เช่น แก้วน้ำ, กาแฟโบราณ, ยาดมหงส์ไทย, รถยนต์คลาสสิก" 
+                                    class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40">
+                                <div class="flex flex-wrap gap-1.5 pt-1">
+                                    <span class="text-[11px] text-slate-500 mr-1">ตัวอย่างด่วน:</span>
+                                    <button type="button" onclick="setAiImgTopic('แก้วน้ำ')" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300/80 hover:bg-slate-700">แก้วน้ำ</button>
+                                    <button type="button" onclick="setAiImgTopic('กาแฟโบราณ')" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300/80 hover:bg-slate-700">กาแฟโบราณ</button>
+                                    <button type="button" onclick="setAiImgTopic('ยาดมหงส์ไทย')" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300/80 hover:bg-slate-700">ยาดมหงส์ไทย</button>
+                                    <button type="button" onclick="setAiImgTopic('ชาไทย')" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300/80 hover:bg-slate-700">ชาไทย</button>
+                                    <button type="button" onclick="setAiImgTopic('รองเท้าผ้าใบ')" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300/80 hover:bg-slate-700">รองเท้าผ้าใบ</button>
+                                    <button type="button" onclick="setAiImgTopic('นาฬิกาข้อมือ')" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-emerald-300/80 hover:bg-slate-700">นาฬิกาข้อมือ</button>
+                                </div>
+                            </div>
+
+                            <!-- Count and Aspect Ratio Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center">
+                                        <i data-lucide="layers" class="w-3.5 h-3.5 mr-1 text-teal-400"></i>
+                                        จำนวนรูปภาพ
+                                    </label>
+                                    <select id="ai-img-count" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                        <option value="3" selected>3 รูปภาพ (ครบ 3 องค์สารคดี)</option>
+                                        <option value="2">2 รูปภาพ (เปรียบเทียบ อดีต-ปัจจุบัน)</option>
+                                        <option value="4">4 รูปภาพ (ครบมิติสมบูรณ์แบบ)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center">
+                                        <i data-lucide="smartphone" class="w-3.5 h-3.5 mr-1 text-cyan-400"></i>
+                                        สัดส่วนภาพ
+                                    </label>
+                                    <select id="ai-img-aspect" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                        <option value="9:16" selected>📱 9:16 แนวตั้ง (TikTok / Shorts / Reels)</option>
+                                        <option value="1:1">⏹️ 1:1 จัตุรัส (Instagram / ปกสินค้า)</option>
+                                        <option value="16:9">🖥️ 16:9 แนวนอน (YouTube / ปกวิดีโอ)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Visual Style -->
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-semibold text-slate-300 flex items-center">
+                                    <i data-lucide="camera" class="w-3.5 h-3.5 mr-1.5 text-emerald-400"></i>
+                                    สไตล์ศิลปะของภาพ (Visual Theme)
+                                </label>
+                                <select id="ai-img-style" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                                    <option value="documentary" selected>🎥 ภาพถ่ายสารคดี Cinematic & ย้อนยุค (แสงธรรมชาติ สมจริง 8k)</option>
+                                    <option value="product">📸 ถ่ายภาพสินค้าสตูดิโอระดับพรีเมียม (High-end Studio Photography)</option>
+                                    <option value="macro">🔍 สมจริงระดับ Extreme Macro (ซูมลึก ละลายหลัง คมชัดจัดเต็ม)</option>
+                                    <option value="vintage">🎨 ภาพวาดสีน้ำมันคลาสสิก (Renaissance Oil Painting)</option>
+                                    <option value="cyberpunk">🔮 โมเดิร์น 3D & Cyberpunk (เรนเดอร์อนาคต แสงนีออนสุดล้ำ)</option>
+                                </select>
+                            </div>
+
+                            <!-- Optional API Key accordion -->
+                            <details class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 group">
+                                <summary class="font-medium text-slate-300 cursor-pointer flex items-center justify-between select-none">
+                                    <span class="flex items-center space-x-1.5">
+                                        <i data-lucide="key" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                        <span>ตั้งค่า Pollinations Key (ทางเลือก - ไม่ใส่ก็ฟรี 100%)</span>
+                                    </span>
+                                    <span class="text-[10px] text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Free / Optional</span>
+                                </summary>
+                                <div class="mt-2.5 space-y-2 pt-2 border-t border-slate-800">
+                                    <input type="password" id="ai-img-poll-key" value="{{ config.pollinations_api_key or '' }}" placeholder="sk_... (สมัครรับฟรีได้ที่ enter.pollinations.ai)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                    <p class="text-[10px] text-slate-500 leading-normal">
+                                        💡 หากไม่ได้ระบุ ระบบจะดึงภาพถ่ายสารคดีของจริงความละเอียดสูงจากคลังภาพประวัติศาสตร์ระดับโลก (Wikimedia Commons) ให้ครบ 3 องค์ รับประกันภาพจริงแท้ 100% สวยงาม คมชัด ไม่มีกล่องข้อความแน่นอน!
+                                    </p>
+                                </div>
+                            </details>
+
+                            <!-- Generate Button -->
+                            <button type="button" id="btn-generate-images" onclick="generateImagesSubmit()" class="w-full py-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white rounded-xl text-sm font-bold flex items-center justify-center space-x-2 transition shadow-lg shadow-emerald-600/25">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                <span>🎨 สร้างภาพ AI 2-3 ภาพที่แตกต่างกัน (Generate Images)</span>
+                            </button>
+
+                            <!-- Loading indicator -->
+                            <div id="ai-img-loading" class="hidden p-4 bg-slate-900/90 border border-emerald-500/40 rounded-xl space-y-2 text-xs">
+                                <div class="flex items-center space-x-3 text-emerald-300">
+                                    <span class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+                                    <span id="ai-img-loading-text" class="font-medium">กำลังวางมุมมองภาพและสั่งเรนเดอร์ทีละภาพ...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div id="ai-img-progress" class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-1.5 rounded-full transition-all duration-500 w-1/3 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            <!-- Helpful Tips Card -->
+                            <div class="p-4 bg-emerald-950/20 border border-emerald-800/40 rounded-2xl space-y-2">
+                                <div class="flex items-center space-x-2 text-xs font-bold text-emerald-300">
+                                    <i data-lucide="lightbulb" class="w-4 h-4 text-emerald-400"></i>
+                                    <span>เคล็ดลับการนำภาพไปใช้ในสารคดี:</span>
+                                </div>
+                                <ul class="text-[11px] text-slate-400 space-y-1 list-disc list-inside leading-relaxed">
+                                    <li>เมื่อสร้างภาพเสร็จ กดปุ่ม <b>"🚀 ส่งทั้ง 3 รูปนี้ไปทำสารคดีสั้น"</b> ได้ในคลิกเดียว</li>
+                                    <li>ระบบสารคดีจะนำภาพทั้ง 3 ภาพมาใส่เอฟเฟกต์ซูม <b>Ken Burns Zoom & Pan</b> อัตโนมัติ</li>
+                                    <li>ภาพจะรันตามไทม์ไลน์เสียงพากย์ 3 องค์ (กำเนิด &rarr; จุดเด่น &rarr; บทสรุป) พอดีเป๊ะ</li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column: Gallery & Results (7 cols) -->
+                        <div class="lg:col-span-7 space-y-4">
+                            
+                            <!-- Header Action Bar (appears after generation) -->
+                            <div id="ai-img-gallery-header" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-slate-900/80 border border-emerald-500/30 rounded-2xl">
+                                <div>
+                                    <h4 class="text-xs font-bold text-emerald-300 flex items-center">
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-1.5 text-emerald-400"></i>
+                                        สร้างภาพสำเร็จแล้ว (<span id="ai-img-result-count">3</span> ภาพ)
+                                    </h4>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">ภาพมุมมองที่แตกต่างกัน พร้อมความคมชัดระดับ HD</p>
+                                </div>
+                                <button type="button" onclick="sendImagesToOriginStudio()" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl text-xs font-bold flex items-center justify-center space-x-1.5 transition shadow-lg shadow-amber-500/25">
+                                    <i data-lucide="arrow-right-circle" class="w-4 h-4"></i>
+                                    <span>🚀 ส่งทั้ง 3 รูปนี้ไปทำสารคดีสั้นทันที</span>
+                                </button>
+                            </div>
+
+                            <!-- Empty Placeholder -->
+                            <div id="ai-img-placeholder" class="p-12 text-center border-2 border-dashed border-slate-800 rounded-3xl space-y-4">
+                                <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                    <i data-lucide="images" class="w-8 h-8"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-300">ยังไม่มีภาพที่ถูกสร้าง</h4>
+                                    <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                                        พิมพ์สิ่งที่ต้องการ เช่น "แก้วน้ำ" แล้วกดปุ่มสร้างภาพ ระบบจะสร้างภาพ 3 มิติเรื่องราวที่แตกต่างกันมาแสดงตรงนี้
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Generated Images Grid -->
+                            <div id="ai-img-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                <!-- Injected via JavaScript -->
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: ADD SINGLE REEL -->
+        <div id="tab-add" class="hidden space-y-6">
+            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl max-w-3xl mx-auto space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white">เพิ่มคลิปใหม่พร้อมปักตะกร้า</h3>
+                    <p class="text-xs text-slate-400 mt-1">เลือกไฟล์วิดีโอจากคอมพิวเตอร์ กำหนดแพลตฟอร์มที่ต้องการโพสต์ แคปชั่น และระบุสินค้า</p>
+                </div>
+
+                <form id="add-reel-form" onsubmit="submitAddReel(event)" class="space-y-4">
+                    <!-- Platform Selector Checkboxes -->
+                    <div class="p-4 bg-slate-900/60 border border-slate-700/60 rounded-xl space-y-2">
+                        <label class="block text-xs font-semibold text-slate-300">เลือกแพลตฟอร์มที่ต้องการโพสต์คลิปนี้ (เลือกได้หลายช่องทางพร้อมกัน):</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="flex items-center space-x-2.5 p-3 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer transition">
+                                <input type="checkbox" id="add-plat-fb" value="facebook" checked class="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500">
+                                <span class="text-xs font-semibold text-blue-400 flex items-center"><i data-lucide="facebook" class="w-3.5 h-3.5 mr-1.5"></i> FB Reels</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-3 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer transition">
+                                <input type="checkbox" id="add-plat-tt" value="tiktok" checked class="w-4 h-4 text-pink-600 rounded bg-slate-900 border-slate-700 focus:ring-pink-500">
+                                <span class="text-xs font-semibold text-pink-400 flex items-center"><i data-lucide="music-2" class="w-3.5 h-3.5 mr-1.5"></i> TikTok</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-3 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer transition">
+                                <input type="checkbox" id="add-plat-yt" value="youtube" checked class="w-4 h-4 text-rose-600 rounded bg-slate-900 border-slate-700 focus:ring-rose-500">
+                                <span class="text-xs font-semibold text-rose-400 flex items-center"><i data-lucide="youtube" class="w-3.5 h-3.5 mr-1.5"></i> YT Shorts</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- File input -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            ไฟล์วิดีโอ (เลือกจากคอมพิวเตอร์) <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="file" id="reel-file" accept="video/mp4,video/quicktime,video/mov,video/webm" class="block w-full text-sm text-slate-400
+                            file:mr-4 file:py-2.5 file:px-4
+                            file:rounded-xl file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-blue-600 file:text-white
+                            hover:file:bg-blue-500
+                            file:cursor-pointer
+                            bg-slate-900/60 border border-slate-700/60 rounded-xl p-1.5 focus:outline-none">
+                        <p class="text-xs text-slate-500 mt-1">รองรับไฟล์ .mp4, .mov (ความยาวแนะนำ 10 - 60 วินาทีในรูปแบบแนวตั้ง 9:16)</p>
+                    </div>
+
+                    <!-- OR direct path -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">หรือระบุ Path ของไฟล์บนเครื่องคอมพิวเตอร์</label>
+                        <input type="text" id="reel-path" placeholder="เช่น D:\videos\reels\clip_01.mp4" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <!-- Caption -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            คำบรรยายคลิป (แคปชั่น & แฮชแท็ก)
+                        </label>
+                        <textarea id="reel-caption" rows="3" placeholder="ใส่แคปชั่นโดนๆ เช่น รีวิวของใช้ดีบอกต่อ #รีวิวช้อปปี้ #ของดีบอกต่อ" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+
+                    <!-- Product Basket / Link -->
+                    <div class="p-4 bg-slate-900/50 border border-indigo-900/40 rounded-xl space-y-3">
+                        <div class="flex items-center space-x-2 text-indigo-400">
+                            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                            <span class="text-xs font-semibold uppercase tracking-wider">การปักตะกร้าสินค้า (Shopee / Lazada / TikTok Shop)</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">
+                                ลิงก์สินค้า หรือชื่อสินค้าในแคตตาล็อก/ร้านค้า
+                            </label>
+                            <input type="text" id="reel-product" placeholder="เช่น https://s.shopee.co.th/xxx หรือ ไม้ถูพื้นอัตโนมัติ" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                            <p class="text-xs text-slate-400 mt-1">
+                                💡 ระบบจะทำการปักตะกร้าในคลิป (ถ้าแพลตฟอร์มรองรับ) และใส่พิกัดสินค้าลงในคำบรรยายและคอมเมนต์ให้อัตโนมัติ
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-sm font-semibold transition shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>บันทึกเข้าคิวโพสต์</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: BATCH SCAN FOLDER -->
+        <div id="tab-batch" class="hidden space-y-6">
+            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl max-w-3xl mx-auto space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white">ดึงคลิปทั้งโฟลเดอร์เข้าคิว (Batch Import)</h3>
+                    <p class="text-xs text-slate-400 mt-1">สแกนไฟล์วิดีโอทั้งหมดในโฟลเดอร์บนคอมพิวเตอร์ของคุณ แล้วเพิ่มเข้าคิวโพสต์หลายแพลตฟอร์มอัตโนมัติ</p>
+                </div>
+
+                <form onsubmit="submitScanFolder(event)" class="space-y-4">
+                    <!-- Platform Selector -->
+                    <div class="p-4 bg-slate-900/60 border border-slate-700/60 rounded-xl space-y-2">
+                        <label class="block text-xs font-semibold text-slate-300">เลือกแพลตฟอร์มสำหรับคลิปในโฟลเดอร์นี้:</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="flex items-center space-x-2.5 p-3 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer transition">
+                                <input type="checkbox" id="batch-plat-fb" value="facebook" checked class="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500">
+                                <span class="text-xs font-semibold text-blue-400 flex items-center"><i data-lucide="facebook" class="w-3.5 h-3.5 mr-1.5"></i> FB Reels</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-3 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer transition">
+                                <input type="checkbox" id="batch-plat-tt" value="tiktok" checked class="w-4 h-4 text-pink-600 rounded bg-slate-900 border-slate-700 focus:ring-pink-500">
+                                <span class="text-xs font-semibold text-pink-400 flex items-center"><i data-lucide="music-2" class="w-3.5 h-3.5 mr-1.5"></i> TikTok</span>
+                            </label>
+                            <label class="flex items-center space-x-2.5 p-3 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-800 cursor-pointer transition">
+                                <input type="checkbox" id="batch-plat-yt" value="youtube" checked class="w-4 h-4 text-rose-600 rounded bg-slate-900 border-slate-700 focus:ring-rose-500">
+                                <span class="text-xs font-semibold text-rose-400 flex items-center"><i data-lucide="youtube" class="w-3.5 h-3.5 mr-1.5"></i> YT Shorts</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            โฟลเดอร์เก็บคลิปบนคอมพิวเตอร์ <span class="text-rose-400">*</span>
+                        </label>
+                        <input type="text" id="batch-folder" required placeholder="เช่น D:\Videos\Reels_Batch" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                        <p class="text-xs text-slate-500 mt-1">ระบบจะสแกนหาไฟล์ .mp4, .mov ทุกไฟล์ในโฟลเดอร์นี้</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            เทมเพลตแคปชั่นสำหรับทุกคลิป (ใส่ {filename} เพื่อแทนชื่อไฟล์ได้)
+                        </label>
+                        <textarea id="batch-caption" rows="2" placeholder="เช่น รีวิว {filename} ของใช้ดีบอกต่อ #รีวิวช้อปปี้" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            ลิงก์หรือชื่อสินค้าที่จะปักตะกร้า (สำหรับทุกคลิป)
+                        </label>
+                        <input type="text" id="batch-product" placeholder="เช่น https://s.shopee.co.th/xxx" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-sm font-semibold transition shadow-lg shadow-indigo-600/20 flex items-center justify-center space-x-2">
+                        <i data-lucide="scan" class="w-4 h-4"></i>
+                        <span>สแกนและนำเข้าคิวทั้งหมด</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: SETTINGS -->
+        <div id="tab-settings" class="hidden space-y-6">
+            <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 shadow-xl max-w-3xl mx-auto space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white">ตั้งค่าระบบและการโพสต์</h3>
+                    <p class="text-xs text-slate-400 mt-1">กำหนดช่องทางของ Facebook, โหมดการทำงานของเบราว์เซอร์ และความปลอดภัยของบัญชี</p>
+                </div>
+
+                <form onsubmit="submitConfig(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">รูปแบบการโพสต์ Facebook Reels</label>
+                        <select id="cfg-fb-platform" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                            <option value="business_suite">Meta Business Suite (business.facebook.com) - แนะนำสำหรับเพจ</option>
+                            <option value="facebook_web">Facebook Web ทั่วไป (facebook.com/reels/create) - สำหรับโปรไฟล์โหมดมืออาชีพ</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-slate-900/60 border border-slate-700/60 rounded-xl">
+                        <div>
+                            <p class="text-sm font-medium text-slate-200">แสดงหน้าต่างเบราว์เซอร์ขณะบอททำงาน (Headed Mode)</p>
+                            <p class="text-xs text-slate-400">เปิดไว้จะเห็นบอทอัปโหลดสดๆ และช่วยแก้ไขเมื่อมีหน้าต่างยืนยันตัวตน</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="cfg-headed" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">
+                            ระยะเวลาพักระหว่างแต่ละคลิป (นาที)
+                        </label>
+                        <input type="number" id="cfg-delay" min="1" max="60" value="5" class="w-full bg-slate-900/60 border border-slate-700/60 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
+                        <p class="text-xs text-slate-500 mt-1">แนะนำ 5 - 15 นาที เพื่อหลีกเลี่ยงการถูกตรวจจับสแปมจากระบบ</p>
+                    </div>
+
+                    <div class="p-4 bg-purple-950/20 border border-purple-800/40 rounded-xl space-y-2">
+                        <label class="block text-xs font-semibold text-purple-300 mb-1 flex items-center">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-purple-400"></i>
+                            Google Gemini API Key (ทางเลือกสำหรับสตูดิโอ AI)
+                        </label>
+                        <input type="password" id="cfg-gemini-key" value="{{ config.gemini_api_key or '' }}" placeholder="AIzaSy..." class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-purple-500">
+                        <p class="text-[11px] text-slate-400">
+                            💡 รับ API Key ฟรีได้จาก <a href="https://aistudio.google.com" target="_blank" class="text-purple-400 underline">Google AI Studio</a> (หากไม่ระบุ ระบบจะใช้ระบบสคริปต์ Smart Template อัตโนมัติฟรี 100%)
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-emerald-950/20 border border-emerald-800/40 rounded-xl space-y-2">
+                        <label class="block text-xs font-semibold text-emerald-300 mb-1 flex items-center">
+                            <i data-lucide="palette" class="w-3.5 h-3.5 mr-1.5 text-emerald-400"></i>
+                            Pollinations AI Secret Key (ทางเลือกสำหรับโหมดสร้างภาพ AI พิเศษ)
+                        </label>
+                        <input type="password" id="cfg-pollinations-key" value="{{ config.pollinations_api_key or '' }}" placeholder="sk_..." class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500">
+                        <p class="text-[11px] text-slate-400">
+                            💡 รับฟรีได้ที่ <a href="https://enter.pollinations.ai" target="_blank" class="text-emerald-400 underline">enter.pollinations.ai</a> (หากไม่ระบุ ระบบจะดึงภาพถ่ายสารคดีความละเอียดสูง 100% ฟรีอัตโนมัติ)
+                        </p>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition shadow-lg shadow-blue-600/20">
+                        บันทึกการตั้งค่า
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- REALTIME LOGS TERMINAL -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="px-5 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">บันทึกการทำงานสด (Live Multi-Platform Logs)</span>
+                </div>
+                <button onclick="clearLogs()" class="text-xs text-slate-400 hover:text-slate-200">ล้างข้อความ</button>
+            </div>
+            <div id="logs-container" class="log-terminal p-4 h-48 overflow-y-auto font-mono text-xs space-y-1.5 bg-black/40">
+                <div class="text-slate-500">[ระบบ] พร้อมสำหรับการเชื่อมต่อบันทึกสด...</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 hidden bg-slate-800 border border-slate-700 text-slate-100 px-4 py-3 rounded-xl shadow-2xl text-sm flex items-center space-x-2 z-50 transition-all">
+        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+        <span id="toast-message">ข้อความ</span>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            const toastMsg = document.getElementById("toast-message");
+            toastMsg.innerText = msg;
+            toast.classList.remove("hidden");
+            setTimeout(() => { toast.classList.add("hidden"); }, 3500);
+        }
+
+        function switchTab(tabId) {
+            const tabs = ['queue', 'ai', 'origin', 'images', 'add', 'batch', 'settings'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (btn) {
+                    btn.classList.remove('border-blue-500', 'text-blue-400', 'border-purple-500', 'text-purple-300', 'border-amber-500', 'text-amber-300', 'border-emerald-500', 'text-emerald-300');
+                    btn.classList.add('border-transparent', 'text-slate-400');
+                }
+            });
+            const targetEl = document.getElementById(`tab-${tabId}`);
+            if (targetEl) targetEl.classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent', 'text-slate-400');
+                if (tabId === 'ai') {
+                    activeBtn.classList.add('border-purple-500', 'text-purple-300');
+                } else if (tabId === 'origin') {
+                    activeBtn.classList.add('border-amber-500', 'text-amber-300');
+                } else if (tabId === 'images') {
+                    activeBtn.classList.add('border-emerald-500', 'text-emerald-300');
+                } else {
+                    activeBtn.classList.add('border-blue-500', 'text-blue-400');
+                }
+            }
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch("/api/status");
+                const data = await res.json();
+                document.getElementById("stat-total").innerText = data.queue_count;
+                document.getElementById("stat-pending").innerText = data.pending_count;
+                document.getElementById("stat-completed").innerText = data.completed_count;
+                document.getElementById("tab-queue-count").innerText = data.pending_count;
+
+                const statusEl = document.getElementById("stat-status");
+                const btnStart = document.getElementById("btn-start");
+                const btnStop = document.getElementById("btn-stop");
+
+                if (data.is_running) {
+                    statusEl.innerHTML = `
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span class="text-sm font-semibold text-emerald-400">กำลังโพสต์คลิป...</span>
+                    `;
+                    btnStart.classList.add("hidden");
+                    btnStop.classList.remove("hidden");
+                } else {
+                    statusEl.innerHTML = `
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                        <span class="text-sm font-semibold text-slate-300">พร้อมใช้งาน</span>
+                    `;
+                    btnStart.classList.remove("hidden");
+                    btnStop.classList.add("hidden");
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function getPlatformBadge(p, status) {
+            let icon = "facebook";
+            let color = "text-blue-400 border-blue-500/30 bg-blue-500/10";
+            let name = "FB";
+
+            if (p === "tiktok") {
+                icon = "music-2";
+                color = "text-pink-400 border-pink-500/30 bg-pink-500/10";
+                name = "TikTok";
+            } else if (p === "youtube") {
+                icon = "youtube";
+                color = "text-rose-400 border-rose-500/30 bg-rose-500/10";
+                name = "YT Shorts";
+            }
+
+            let statusIcon = "⏳";
+            if (status === "running") statusIcon = "🔄";
+            if (status === "completed") statusIcon = "✅";
+            if (status === "failed") statusIcon = "❌";
+
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${color} mr-1 mb-1">
+                ${statusIcon} ${name}
+            </span>`;
+        }
+
+        async function loadQueue() {
+            try {
+                const res = await fetch("/api/queue");
+                const queue = await res.json();
+                const tbody = document.getElementById("queue-table-body");
+
+                if (!queue || queue.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-5 py-10 text-center text-slate-500">
+                                ยังไม่มีคลิปในคิว กรุณาไปที่แท็บ "เพิ่มคลิปใหม่" หรือ "นำเข้าทั้งโฟลเดอร์"
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = queue.map((item, idx) => {
+                    let statusBadge = "";
+                    if (item.status === "pending") {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">⏳ รอโพสต์</span>`;
+                    } else if (item.status === "running") {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 animate-pulse">🔄 กำลังโพสต์...</span>`;
+                    } else if (item.status === "completed") {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ สำเร็จครบ</span>`;
+                    } else if (item.status === "partial") {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">⚡ สำเร็จบางส่วน</span>`;
+                    } else {
+                        statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20" title="${item.error_message || ''}">❌ ผิดพลาด</span>`;
+                    }
+
+                    const platBadges = (item.platforms || ["facebook"]).map(p => {
+                        const st = (item.platform_status || {})[p] || item.status;
+                        return getPlatformBadge(p, st);
+                    }).join("");
+
+                    return `
+                        <tr class="hover:bg-slate-800/30 transition">
+                            <td class="px-5 py-3 font-medium text-slate-200">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs text-slate-500">#${idx + 1}</span>
+                                    <span class="truncate max-w-[200px]" title="${item.video_path}">${item.filename}</span>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3">
+                                <div class="flex flex-wrap">${platBadges}</div>
+                            </td>
+                            <td class="px-5 py-3">
+                                <p class="line-clamp-2 text-xs text-slate-300 max-w-xs">${item.caption || '-'}</p>
+                            </td>
+                            <td class="px-5 py-3">
+                                <div class="text-xs text-indigo-400 flex items-center space-x-1">
+                                    <i data-lucide="tag" class="w-3.5 h-3.5"></i>
+                                    <span class="truncate max-w-[150px]">${item.product_name_or_link || 'ไม่มีการปัก'}</span>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3">
+                                ${statusBadge}
+                            </td>
+                            <td class="px-5 py-3 text-right space-x-2">
+                                ${item.status === 'failed' || item.status === 'partial' ? `
+                                    <button onclick="retryItem('${item.id}')" class="text-xs px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30 transition">
+                                        ลองใหม่
+                                    </button>
+                                ` : ''}
+                                <button onclick="deleteItem('${item.id}')" class="text-xs px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg border border-rose-500/30 transition">
+                                    ลบ
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
+
+                lucide.createIcons();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function getSelectedPlatforms(prefix) {
+            const list = [];
+            if (document.getElementById(`${prefix}-plat-fb`).checked) list.push("facebook");
+            if (document.getElementById(`${prefix}-plat-tt`).checked) list.push("tiktok");
+            if (document.getElementById(`${prefix}-plat-yt`).checked) list.push("youtube");
+            return list.length > 0 ? list : ["facebook"];
+        }
+
+        async function submitAddReel(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById("reel-file");
+            const pathInput = document.getElementById("reel-path");
+            const caption = document.getElementById("reel-caption").value;
+            const product = document.getElementById("reel-product").value;
+            const platforms = getSelectedPlatforms("add");
+
+            if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+                formData.append("caption", caption);
+                formData.append("product_name_or_link", product);
+                formData.append("platforms", platforms.join(","));
+
+                showToast("กำลังอัปโหลดไฟล์คลิป...");
+                const res = await fetch("/api/queue/upload", { method: "POST", body: formData });
+                const data = await res.json();
+                if (data.status === "success") {
+                    showToast("เพิ่มคลิปเข้าคิวสำเร็จ!");
+                    e.target.reset();
+                    switchTab("queue");
+                    loadQueue();
+                    fetchStatus();
+                } else {
+                    alert("ข้อผิดพลาด: " + data.message);
+                }
+            } else if (pathInput.value.trim()) {
+                const res = await fetch("/api/queue/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        video_path: pathInput.value.trim(),
+                        caption: caption,
+                        product_name_or_link: product,
+                        platforms: platforms
+                    })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    showToast("เพิ่มคลิปเข้าคิวสำเร็จ!");
+                    e.target.reset();
+                    switchTab("queue");
+                    loadQueue();
+                    fetchStatus();
+                } else {
+                    alert("ข้อผิดพลาด: " + data.message);
+                }
+            } else {
+                alert("กรุณาเลือกไฟล์วิดีโอ หรือระบุ Path ของไฟล์บนเครื่องคอมพิวเตอร์");
+            }
+        }
+
+        async function submitScanFolder(e) {
+            e.preventDefault();
+            const folderPath = document.getElementById("batch-folder").value.trim();
+            const template = document.getElementById("batch-caption").value.trim();
+            const product = document.getElementById("batch-product").value.trim();
+            const platforms = getSelectedPlatforms("batch");
+
+            showToast("กำลังสแกนโฟลเดอร์...");
+            const res = await fetch("/api/queue/scan_folder", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    folder_path: folderPath,
+                    caption_template: template,
+                    product_name_or_link: product,
+                    platforms: platforms
+                })
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                showToast(`นำเข้าสำเร็จ ${data.count} คลิป!`);
+                e.target.reset();
+                switchTab("queue");
+                loadQueue();
+                fetchStatus();
+            } else {
+                alert("ข้อผิดพลาด: " + data.message);
+            }
+        }
+
+        async function submitConfig(e) {
+            e.preventDefault();
+            const fbPlatform = document.getElementById("cfg-fb-platform").value;
+            const headed = document.getElementById("cfg-headed").checked;
+            const delay = parseInt(document.getElementById("cfg-delay").value, 10);
+            const geminiKey = document.getElementById("cfg-gemini-key") ? document.getElementById("cfg-gemini-key").value.trim() : "";
+            const pollinationsKey = document.getElementById("cfg-pollinations-key") ? document.getElementById("cfg-pollinations-key").value.trim() : "";
+
+            await fetch("/api/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    fb_platform: fbPlatform,
+                    headless: !headed,
+                    delay_between_posts_minutes: delay,
+                    auto_comment_product_link: true,
+                    gemini_api_key: geminiKey,
+                    pollinations_api_key: pollinationsKey
+                })
+            });
+            showToast("บันทึกการตั้งค่าเรียบร้อยแล้ว");
+        }
+
+        // ==================== AI VIDEO STUDIO FUNCTIONS ====================
+        let currentAIVideoData = null;
+
+        async function quickSaveGeminiKey() {
+            const key = document.getElementById("ai-tab-gemini-key").value.trim();
+            try {
+                const res = await fetch("/api/config/gemini_key", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ api_key: key })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    const statusEl = document.getElementById("ai-key-status");
+                    if (data.has_key) {
+                        statusEl.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium";
+                        statusEl.innerText = "✅ เชื่อมต่อ Gemini API แล้ว";
+                    } else {
+                        statusEl.className = "text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+                        statusEl.innerText = "⚡ ระบบสคริปต์อัตโนมัติในตัว (ฟรี)";
+                    }
+                    if (document.getElementById("cfg-gemini-key")) {
+                        document.getElementById("cfg-gemini-key").value = key;
+                    }
+                    showToast("🔑 " + data.message);
+                } else {
+                    alert("บันทึกคีย์ไม่สำเร็จ: " + data.message);
+                }
+            } catch (e) {
+                alert("ข้อผิดพลาด: " + e.message);
+            }
+        }
+
+        async function generateAIScriptOnly() {
+            const name = document.getElementById("ai-product-name").value.trim();
+            if (!name) {
+                alert("กรุณากรอกชื่อสินค้าหรือเรื่องที่จะทำคลิปก่อนครับ");
+                return;
+            }
+            const details = document.getElementById("ai-product-details").value.trim();
+            const link = document.getElementById("ai-product-link").value.trim();
+            const style = document.getElementById("ai-style").value;
+            const geminiKey = (document.getElementById("ai-tab-gemini-key")?.value || document.getElementById("cfg-gemini-key")?.value || "").trim();
+
+            const btn = document.getElementById("btn-ai-script");
+            const loading = document.getElementById("ai-loading");
+            const loadingText = document.getElementById("ai-loading-text");
+            btn.disabled = true;
+            loadingText.innerText = "กำลังใช้ AI คิดสคริปต์ แคปชั่น และประโยคเปิดคลิป...";
+            loading.classList.remove("hidden");
+
+            try {
+                const res = await fetch("/api/ai/script", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        product_name: name,
+                        details: details,
+                        product_link: link,
+                        style: style,
+                        gemini_api_key: geminiKey
+                    })
+                });
+                const resp = await res.json();
+                if (resp.status === "success") {
+                    const data = resp.data;
+                    document.getElementById("ai-preview-title").value = data.title || name;
+                    document.getElementById("ai-preview-voicetext").value = data.voice_text || "";
+                    document.getElementById("ai-preview-caption").value = data.caption || "";
+                    document.getElementById("ai-script-box").classList.remove("hidden");
+                    showToast("✨ สร้างสคริปต์และแคปชั่นเรียบร้อยแล้ว!");
+                } else {
+                    alert("ข้อผิดพลาดในการสร้างสคริปต์: " + resp.message);
+                }
+            } catch (err) {
+                alert("เกิดข้อผิดพลาด: " + err.message);
+            } finally {
+                btn.disabled = false;
+                loading.classList.add("hidden");
+            }
+        }
+
+        async function createAIVideo() {
+            const name = document.getElementById("ai-product-name").value.trim();
+            if (!name) {
+                alert("กรุณากรอกชื่อสินค้าก่อนเริ่มสร้างคลิปครับ");
+                return;
+            }
+            const details = document.getElementById("ai-product-details").value.trim();
+            const link = document.getElementById("ai-product-link").value.trim();
+            const style = document.getElementById("ai-style").value;
+            const voice = document.getElementById("ai-voice").value;
+            const voiceRate = document.getElementById("ai-voice-rate") ? document.getElementById("ai-voice-rate").value : "+4%";
+            const enableBgm = document.getElementById("ai-enable-bgm") ? document.getElementById("ai-enable-bgm").checked : true;
+            const geminiKey = (document.getElementById("ai-tab-gemini-key")?.value || document.getElementById("cfg-gemini-key")?.value || "").trim();
+
+            const videoStyle = document.getElementById("ai-video-style") ? document.getElementById("ai-video-style").value : "presenter";
+            const bgTheme = document.getElementById("ai-bg-theme") ? document.getElementById("ai-bg-theme").value : "cyber";
+
+            const customTitle = document.getElementById("ai-preview-title").value.trim();
+            const customVoiceText = document.getElementById("ai-preview-voicetext").value.trim();
+            const customCaption = document.getElementById("ai-preview-caption").value.trim();
+
+            const imageFiles = document.getElementById("ai-product-images").files;
+
+            const formData = new FormData();
+            formData.append("product_name", name);
+            formData.append("details", details);
+            formData.append("product_link", link);
+            formData.append("style", style);
+            formData.append("voice_name", voice);
+            formData.append("voice_rate", voiceRate);
+            formData.append("enable_bgm", enableBgm ? "true" : "false");
+            formData.append("gemini_api_key", geminiKey);
+            formData.append("video_style", videoStyle);
+            formData.append("bg_theme", bgTheme);
+
+            if (customTitle) formData.append("title", customTitle);
+            if (customVoiceText) formData.append("voice_text", customVoiceText);
+            if (customCaption) formData.append("caption", customCaption);
+
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append("images", imageFiles[i]);
+            }
+
+            const btnRender = document.getElementById("btn-ai-render");
+            const loading = document.getElementById("ai-loading");
+            const loadingText = document.getElementById("ai-loading-text");
+            btnRender.disabled = true;
+            loadingText.innerText = "กำลังสังเคราะห์เสียงพูด AI และเรนเดอร์วิดีโอ 9:16 ความละเอียดสูง...";
+            loading.classList.remove("hidden");
+
+            try {
+                showToast("กำลังเริ่มสร้างคลิปด้วย AI...");
+                const res = await fetch("/api/ai/create_video", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    currentAIVideoData = data;
+
+                    // แสดงสคริปต์ในกล่องถ้ายังไม่ได้เปิด
+                    document.getElementById("ai-preview-title").value = data.title || name;
+                    document.getElementById("ai-preview-voicetext").value = data.voice_text || "";
+                    document.getElementById("ai-preview-caption").value = data.caption || "";
+                    document.getElementById("ai-script-box").classList.remove("hidden");
+
+                    // อัปเดต Video Player
+                    const player = document.getElementById("ai-video-player");
+                    const placeholder = document.getElementById("ai-video-placeholder");
+                    player.src = data.video_url + "?t=" + Date.now();
+                    player.classList.remove("hidden");
+                    placeholder.classList.add("hidden");
+                    player.play().catch(e => console.log(e));
+
+                    // อัปเดตข้อมูลเมตาและปุ่มดาวน์โหลด
+                    document.getElementById("ai-video-duration").innerText = data.duration.toFixed(1);
+                    document.getElementById("ai-video-meta").classList.remove("hidden");
+                    document.getElementById("ai-preview-badge").innerText = "สร้างสำเร็จ";
+                    document.getElementById("ai-preview-badge").className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium";
+
+                    const dlLink = document.getElementById("ai-download-link");
+                    dlLink.href = data.video_url;
+                    dlLink.setAttribute("download", data.filename);
+
+                    // แสดงกล่องส่งเข้าคิว
+                    document.getElementById("ai-actions-box").classList.remove("hidden");
+                    showToast("🎉 สร้างคลิปวิดีโอด้วย AI สำเร็จแล้ว!");
+                    lucide.createIcons();
+                } else {
+                    alert("เกิดข้อผิดพลาดในการสร้างวิดีโอ: " + data.message);
+                }
+            } catch (err) {
+                alert("ข้อผิดพลาด: " + err.message);
+            } finally {
+                btnRender.disabled = false;
+                loading.classList.add("hidden");
+            }
+        }
+
+        async function sendAIVideoToQueue() {
+            if (!currentAIVideoData || !currentAIVideoData.video_path) {
+                alert("ไม่พบไฟล์คลิปที่สร้าง กรุณาสร้างคลิปด้วย AI ก่อนครับ");
+                return;
+            }
+
+            const platforms = [];
+            if (document.getElementById("ai-plat-fb").checked) platforms.push("facebook");
+            if (document.getElementById("ai-plat-tt").checked) platforms.push("tiktok");
+            if (document.getElementById("ai-plat-yt").checked) platforms.push("youtube");
+
+            if (platforms.length === 0) {
+                alert("กรุณาเลือกอย่างน้อย 1 แพลตฟอร์มที่ต้องการโพสต์");
+                return;
+            }
+
+            const caption = document.getElementById("ai-preview-caption").value.trim() || currentAIVideoData.caption;
+            const product = currentAIVideoData.product_link || "";
+
+            const btn = document.getElementById("btn-ai-send-queue");
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>กำลังส่งเข้าคิว...</span>`;
+
+            try {
+                const res = await fetch("/api/ai/send_to_queue", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        video_path: currentAIVideoData.video_path,
+                        caption: caption,
+                        product_name_or_link: product,
+                        platforms: platforms
+                    })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    showToast("🚀 ส่งคลิป AI เข้าสู่คิวโพสต์สำเร็จแล้ว!");
+                    // สลับไปยังหน้าคิวโพสต์ทันที
+                    switchTab("queue");
+                    loadQueue();
+                    fetchStatus();
+                } else {
+                    alert("ข้อผิดพลาด: " + data.message);
+                }
+            } catch (err) {
+                alert("ข้อผิดพลาด: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>🚀 ส่งเข้าคิวโพสต์ทันที (Add to Post Queue)</span>`;
+                lucide.createIcons();
+            }
+        }
+
+        function copyAIVideoPrompt() {
+            const name = document.getElementById("ai-product-name").value.trim() || "modern product showcase";
+            const details = document.getElementById("ai-product-details").value.trim() || "high quality, premium design";
+            const textToCopy = `Vertical 9:16 cinematic video of ${name}, ${details}. Realistic motion, a smiling friendly presenter showcasing the product, natural hand gestures, dynamic camera slow pan and zoom in, soft studio lighting, commercial advertisement quality, photorealistic, 4k 60fps.`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast("📋 คัดลอก Prompt สำหรับ Kling / Luma เรียบร้อยแล้ว!");
+            }).catch(() => {
+                alert("Prompt: " + textToCopy);
+            });
+        }
+
+        // ================== ORIGIN STORY STUDIO JS ==================
+        let currentOriginVideoData = null;
+
+        async function generateOriginScriptOnly() {
+            const topic = document.getElementById("origin-topic").value.trim();
+            if (!topic) {
+                alert("กรุณากรอกหัวข้อหรือสิ่งของที่จะเล่าก่อนครับ เช่น ยาดม, ชาไทย, บะหมี่");
+                return;
+            }
+            const angle = document.getElementById("origin-angle").value;
+            const productName = document.getElementById("origin-product-name").value.trim();
+            const productLink = document.getElementById("origin-product-link").value.trim();
+            const geminiKey = (document.getElementById("ai-tab-gemini-key")?.value || document.getElementById("cfg-gemini-key")?.value || "").trim();
+
+            const btn = document.getElementById("btn-origin-script");
+            const loading = document.getElementById("origin-loading");
+            const loadingText = document.getElementById("origin-loading-text");
+            btn.disabled = true;
+            loadingText.innerText = `กำลังค้นคว้าประวัติและสร้างสคริปต์ ${topic} สไตล์สารคดีชวนติดตาม...`;
+            loading.classList.remove("hidden");
+
+            try {
+                const res = await fetch("/api/ai/origin_script", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        topic: topic,
+                        story_angle: angle,
+                        product_name: productName,
+                        product_link: productLink,
+                        gemini_api_key: geminiKey
+                    })
+                });
+                const resp = await res.json();
+                if (resp.status === "success") {
+                    const data = resp.data;
+                    document.getElementById("origin-preview-title").value = data.title || topic;
+                    document.getElementById("origin-preview-hook").value = data.hook || "";
+                    document.getElementById("origin-preview-voicetext").value = data.voice_text || "";
+                    document.getElementById("origin-preview-caption").value = data.caption || "";
+                    document.getElementById("origin-script-box").classList.remove("hidden");
+                    showToast("✨ สร้างสคริปต์สารคดีต้นกำเนิดเรียบร้อยแล้ว!");
+                } else {
+                    alert("ข้อผิดพลาดในการสร้างสคริปต์: " + resp.message);
+                }
+            } catch (err) {
+                alert("เกิดข้อผิดพลาด: " + err.message);
+            } finally {
+                btn.disabled = false;
+                loading.classList.add("hidden");
+            }
+        }
+
+        async function createOriginVideo() {
+            const topic = document.getElementById("origin-topic").value.trim();
+            if (!topic) {
+                alert("กรุณากรอกหัวข้อที่จะทำคลิปสารคดีสั้นก่อนครับ");
+                return;
+            }
+            const angle = document.getElementById("origin-angle").value;
+            const productName = document.getElementById("origin-product-name").value.trim();
+            const productLink = document.getElementById("origin-product-link").value.trim();
+            const voice = document.getElementById("origin-voice").value;
+            const videoStyle = document.getElementById("origin-video-style").value;
+            const geminiKey = (document.getElementById("ai-tab-gemini-key")?.value || document.getElementById("cfg-gemini-key")?.value || "").trim();
+
+            const customTitle = document.getElementById("origin-preview-title").value.trim();
+            const customHook = document.getElementById("origin-preview-hook").value.trim();
+            const customVoiceText = document.getElementById("origin-preview-voicetext").value.trim();
+            const customCaption = document.getElementById("origin-preview-caption").value.trim();
+
+            const imageFiles = document.getElementById("origin-images").files;
+
+            const formData = new FormData();
+            formData.append("topic", topic);
+            formData.append("story_angle", angle);
+            formData.append("product_name", productName);
+            formData.append("product_link", productLink);
+            formData.append("voice_name", voice);
+            formData.append("voice_rate", "+3%");
+            formData.append("enable_bgm", "true");
+            formData.append("gemini_api_key", geminiKey);
+            formData.append("video_style", videoStyle);
+
+            if (customTitle) formData.append("title", customTitle);
+            if (customHook) formData.append("hook", customHook);
+            if (customVoiceText) formData.append("voice_text", customVoiceText);
+            if (customCaption) formData.append("caption", customCaption);
+
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append("images", imageFiles[i]);
+            }
+            if (window.originServerImagePaths && window.originServerImagePaths.length > 0) {
+                formData.append("server_image_paths", JSON.stringify(window.originServerImagePaths));
+            }
+
+            const btnCreate = document.getElementById("btn-origin-create-video");
+            const loading = document.getElementById("origin-loading");
+            const loadingText = document.getElementById("origin-loading-text");
+            btnCreate.disabled = true;
+            loadingText.innerText = "กำลังสังเคราะห์เสียงพากย์และเรนเดอร์ภาพสารคดีด้วยเอฟเฟกต์ซูม Cinematic 9:16...";
+            loading.classList.remove("hidden");
+
+            try {
+                showToast("กำลังเริ่มสร้างคลิปสารคดีสั้น & ต้นกำเนิด...");
+                const res = await fetch("/api/ai/create_origin_video", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    currentOriginVideoData = data;
+
+                    // แสดงสคริปต์ในกล่องถ้ายังไม่ได้เปิด
+                    document.getElementById("origin-preview-title").value = data.title || topic;
+                    document.getElementById("origin-preview-hook").value = data.hook || "";
+                    document.getElementById("origin-preview-voicetext").value = data.voice_text || "";
+                    document.getElementById("origin-preview-caption").value = data.caption || "";
+                    document.getElementById("origin-script-box").classList.remove("hidden");
+
+                    // อัปเดต Video Player
+                    const player = document.getElementById("origin-video-player");
+                    player.src = data.video_url + "?t=" + Date.now();
+                    player.play().catch(e => console.log(e));
+
+                    document.getElementById("origin-video-duration").innerText = data.duration.toFixed(1) + " วินาที";
+                    const dlLink = document.getElementById("origin-download-link");
+                    dlLink.href = data.video_url;
+                    dlLink.setAttribute("download", data.filename);
+
+                    // แสดงกล่องส่งเข้าคิว
+                    document.getElementById("origin-result-box").classList.remove("hidden");
+                    showToast("🎉 สร้างคลิปสารคดีสั้น & ต้นกำเนิดสำเร็จแล้ว!");
+                    lucide.createIcons();
+                } else {
+                    alert("เกิดข้อผิดพลาดในการสร้างวิดีโอ: " + data.message);
+                }
+            } catch (err) {
+                alert("ข้อผิดพลาด: " + err.message);
+            } finally {
+                btnCreate.disabled = false;
+                loading.classList.add("hidden");
+            }
+        }
+
+        async function sendOriginToQueue() {
+            if (!currentOriginVideoData || !currentOriginVideoData.video_path) {
+                alert("ไม่พบไฟล์คลิปที่สร้าง กรุณาสร้างคลิปสารคดีสั้นก่อนครับ");
+                return;
+            }
+
+            const platforms = [];
+            if (document.getElementById("origin-post-fb").checked) platforms.push("facebook");
+            if (document.getElementById("origin-post-tt").checked) platforms.push("tiktok");
+            if (document.getElementById("origin-post-yt").checked) platforms.push("youtube");
+
+            if (platforms.length === 0) {
+                alert("กรุณาเลือกอย่างน้อย 1 แพลตฟอร์มที่ต้องการโพสต์");
+                return;
+            }
+
+            const caption = document.getElementById("origin-preview-caption").value.trim() || currentOriginVideoData.caption;
+            const product = currentOriginVideoData.product_link || "";
+
+            const btn = document.getElementById("btn-origin-send-queue");
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>กำลังส่งเข้าคิว...</span>`;
+
+            try {
+                const res = await fetch("/api/ai/send_to_queue", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        video_path: currentOriginVideoData.video_path,
+                        caption: caption,
+                        product_name_or_link: product,
+                        platforms: platforms
+                    })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    showToast("🚀 ส่งคลิปสารคดีสั้นเข้าสู่คิวโพสต์สำเร็จแล้ว!");
+                    switchTab("queue");
+                    loadQueue();
+                    fetchStatus();
+                } else {
+                    alert("ข้อผิดพลาด: " + data.message);
+                }
+            } catch (err) {
+                alert("ข้อผิดพลาด: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i><span>🚀 ส่งเข้าคิวโพสต์ทันที (Add to Post Queue)</span>`;
+                lucide.createIcons();
+            }
+        }
+
+        async function openLogin(platform) {
+            const names = { facebook: "Facebook", tiktok: "TikTok", youtube: "YouTube" };
+            showToast(`🔑 กำลังเปิดแท็บล็อกอินสำหรับ ${names[platform]}...`);
+            try {
+                await fetch(`/api/browser/login?platform=${platform}`, { method: "POST" });
+            } catch (err) {
+                const urls = {
+                    facebook: "https://business.facebook.com",
+                    tiktok: "https://www.tiktok.com/login",
+                    youtube: "https://studio.youtube.com"
+                };
+                window.open(urls[platform], '_blank');
+            }
+        }
+
+        // ==========================================
+        // AI Voice Preview (ทดลองฟังเสียงพากย์)
+        // ==========================================
+        let currentPreviewAudio = null;
+        let currentPreviewSelectId = null;
+
+        function testPlayVoice(selectId) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const voice = select.value;
+            const btnText = document.getElementById(`btn-test-${selectId}-text`);
+
+            // If this voice is already playing, pause it (toggle behavior)
+            if (currentPreviewAudio && currentPreviewSelectId === selectId) {
+                currentPreviewAudio.pause();
+                currentPreviewAudio.currentTime = 0;
+                if (btnText) btnText.innerText = "🔊 ฟังตัวอย่างเสียง";
+                currentPreviewAudio = null;
+                currentPreviewSelectId = null;
+                return;
+            }
+
+            // If another voice is playing, stop it first
+            if (currentPreviewAudio) {
+                currentPreviewAudio.pause();
+                currentPreviewAudio.currentTime = 0;
+                if (currentPreviewSelectId) {
+                    const prevBtn = document.getElementById(`btn-test-${currentPreviewSelectId}-text`);
+                    if (prevBtn) prevBtn.innerText = "🔊 ฟังตัวอย่างเสียง";
+                }
+                currentPreviewAudio = null;
+                currentPreviewSelectId = null;
+            }
+
+            if (btnText) btnText.innerText = "⏸️ กำลังเล่น (กดหยุด)...";
+            currentPreviewSelectId = selectId;
+
+            const audioUrl = `/api/ai/preview_voice?voice_name=${encodeURIComponent(voice)}&t=${Date.now()}`;
+            currentPreviewAudio = new Audio(audioUrl);
+
+            currentPreviewAudio.onended = () => {
+                if (btnText) btnText.innerText = "🔊 ฟังตัวอย่างเสียง";
+                currentPreviewAudio = null;
+                currentPreviewSelectId = null;
+            };
+
+            currentPreviewAudio.onerror = (e) => {
+                console.error("Audio preview error:", e);
+                if (btnText) btnText.innerText = "🔊 ฟังตัวอย่างเสียง";
+                currentPreviewAudio = null;
+                currentPreviewSelectId = null;
+                showToast("⚠️ ไม่สามารถเล่นเสียงตัวอย่างได้ หรือเบราว์เซอร์บล็อกการเล่นเสียง");
+            };
+
+            currentPreviewAudio.play().then(() => {
+                showToast(`🔊 กำลังเล่นตัวอย่างเสียง: ${voice}`);
+            }).catch(err => {
+                console.warn("Autoplay error:", err);
+                if (btnText) btnText.innerText = "🔊 ฟังตัวอย่างเสียง";
+                currentPreviewAudio = null;
+                currentPreviewSelectId = null;
+                showToast("⚠️ กรุณากดปุ่มอีกครั้งเพื่อให้เบราว์เซอร์อนุญาตการเล่นเสียง");
+            });
+        }
+
+        function onVoiceChanged(selectId) {
+            if (currentPreviewAudio) {
+                currentPreviewAudio.pause();
+                currentPreviewAudio.currentTime = 0;
+                if (currentPreviewSelectId) {
+                    const prevBtn = document.getElementById(`btn-test-${currentPreviewSelectId}-text`);
+                    if (prevBtn) prevBtn.innerText = "🔊 ฟังตัวอย่างเสียง";
+                }
+                currentPreviewAudio = null;
+                currentPreviewSelectId = null;
+            }
+        }
+
+        // ==========================================
+        // AI Image Studio (2-3 Images Generator)
+        // ==========================================
+        window.lastGeneratedImages = [];
+        window.originServerImagePaths = [];
+
+        function setAiImgTopic(topic) {
+            document.getElementById('ai-img-topic').value = topic;
+        }
+
+        async function generateImagesSubmit() {
+            const topic = document.getElementById("ai-img-topic").value.trim();
+            if (!topic) {
+                alert("กรุณากรอกหัวข้อหรือสิ่งของที่ต้องการสร้างภาพ (เช่น แก้วน้ำ, กาแฟโบราณ)");
+                document.getElementById("ai-img-topic").focus();
+                return;
+            }
+
+            const count = parseInt(document.getElementById("ai-img-count").value, 10) || 3;
+            const aspect = document.getElementById("ai-img-aspect").value;
+            const style = document.getElementById("ai-img-style").value;
+            const geminiKey = (document.getElementById("ai-tab-gemini-key")?.value || document.getElementById("cfg-gemini-key")?.value || "").trim();
+            const pollKey = (document.getElementById("ai-img-poll-key")?.value || document.getElementById("cfg-pollinations-key")?.value || "").trim();
+
+            const btnGen = document.getElementById("btn-generate-images");
+            const loading = document.getElementById("ai-img-loading");
+            const loadingText = document.getElementById("ai-img-loading-text");
+            const progressBar = document.getElementById("ai-img-progress");
+
+            btnGen.disabled = true;
+            loading.classList.remove("hidden");
+            loadingText.innerText = `กำลังคิดมุมมองเรื่องราวและเรนเดอร์ภาพ AI จำนวน ${count} ภาพ...`;
+            progressBar.style.width = "30%";
+
+            showToast(`🎨 เริ่มสร้างภาพ AI ${count} มุมมองสำหรับ: ${topic}`);
+
+            try {
+                const res = await fetch("/api/ai/generate_images", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        topic: topic,
+                        count: count,
+                        style: style,
+                        aspect_ratio: aspect,
+                        gemini_api_key: geminiKey,
+                        pollinations_api_key: pollKey
+                    })
+                });
+
+                progressBar.style.width = "85%";
+                const data = await res.json();
+
+                if (data.status === "success" && data.images && data.images.length > 0) {
+                    window.lastGeneratedImages = data.images;
+                    progressBar.style.width = "100%";
+                    renderGeneratedImagesGrid(data.images);
+                    showToast(`✨ วาดภาพ AI สำเร็จเรียบร้อยครบทั้ง ${data.images.length} ภาพ!`);
+                } else {
+                    alert("เกิดข้อผิดพลาดในการวาดภาพ: " + (data.message || "ไม่สามารถติดต่อระบบสร้างภาพได้"));
+                }
+            } catch (err) {
+                alert("ข้อผิดพลาด: " + err.message);
+            } finally {
+                btnGen.disabled = false;
+                loading.classList.add("hidden");
+            }
+        }
+
+        function renderGeneratedImagesGrid(images) {
+            const grid = document.getElementById("ai-img-grid");
+            const placeholder = document.getElementById("ai-img-placeholder");
+            const header = document.getElementById("ai-img-gallery-header");
+            const countEl = document.getElementById("ai-img-result-count");
+
+            if (!images || images.length === 0) {
+                grid.classList.add("hidden");
+                header.classList.add("hidden");
+                placeholder.classList.remove("hidden");
+                return;
+            }
+
+            countEl.innerText = images.length;
+            placeholder.classList.add("hidden");
+            header.classList.remove("hidden");
+            grid.classList.remove("hidden");
+
+            const actColors = [
+                { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/30", label: "องค์ที่ 1: กำเนิด & ประวัติศาสตร์" },
+                { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/30", label: "องค์ที่ 2: มาโครซูม & รายละเอียด" },
+                { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/30", label: "องค์ที่ 3: ไลฟ์สไตล์ & ร่วมสมัย" },
+                { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/30", label: "องค์ที่ 4: ความลับน่าทึ่ง" }
+            ];
+
+            grid.innerHTML = images.map((img, idx) => {
+                const act = actColors[idx % actColors.length];
+                return `
+                    <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl overflow-hidden shadow-xl flex flex-col group hover:border-emerald-500/50 transition">
+                        <!-- Image Container with Zoom effect -->
+                        <div class="relative overflow-hidden aspect-[9/16] bg-slate-950 flex items-center justify-center">
+                            <img src="${img.image_url}" alt="${escapeHtml(img.title)}" loading="lazy"
+                                class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500">
+                            
+                            <!-- Act Tag Badge -->
+                            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-[10px] font-bold ${act.bg} ${act.text} border ${act.border} backdrop-blur-md shadow-md">
+                                ${escapeHtml(img.title || act.label)}
+                            </span>
+
+                            <!-- Floating Zoom/View Button -->
+                            <a href="${img.image_url}" target="_blank" title="เปิดดูภาพขนาดเต็ม" 
+                                class="absolute top-3 right-3 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white backdrop-blur-md transition opacity-0 group-hover:opacity-100">
+                                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                            </a>
+                        </div>
+
+                        <!-- Card Info & Actions -->
+                        <div class="p-3.5 space-y-2.5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-slate-200 line-clamp-1">${escapeHtml(img.title)}</p>
+                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-1 italic font-mono leading-tight">"${escapeHtml(img.prompt)}"</p>
+                            </div>
+
+                            <div class="space-y-1.5 pt-1 border-t border-slate-800">
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <a href="${img.image_url}" download="${img.filename}" 
+                                        class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[11px] font-medium flex items-center justify-center space-x-1 border border-slate-700 transition">
+                                        <i data-lucide="download" class="w-3 h-3 text-emerald-400"></i>
+                                        <span>โหลดรูป</span>
+                                    </a>
+                                    <button type="button" onclick="sendSingleImageToOrigin('${escapeHtml(img.image_path)}', '${escapeHtml(img.image_url)}')"
+                                        class="px-2 py-1.5 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 rounded-lg text-[11px] font-medium flex items-center justify-center space-x-1 border border-amber-500/40 transition">
+                                        <i data-lucide="plus" class="w-3 h-3"></i>
+                                        <span>ส่งรูปนี้</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            lucide.createIcons();
+        }
+
+        function sendImagesToOriginStudio() {
+            if (!window.lastGeneratedImages || window.lastGeneratedImages.length === 0) {
+                alert("ยังไม่มีรูปภาพที่สร้าง กรุณากดสร้างภาพ AI ก่อนครับ");
+                return;
+            }
+
+            const paths = window.lastGeneratedImages.map(img => img.image_path);
+            const urls = window.lastGeneratedImages.map(img => img.image_url);
+            window.originServerImagePaths = paths;
+
+            const currentTopic = document.getElementById("ai-img-topic").value.trim();
+            const originTopicEl = document.getElementById("origin-topic");
+            if (currentTopic && (!originTopicEl.value.trim() || originTopicEl.value.trim() === "ยาดม")) {
+                originTopicEl.value = currentTopic;
+            }
+
+            updateOriginAttachedPreview(urls);
+            switchTab("origin");
+            showToast(`🚀 นำรูปภาพ AI ทั้ง ${paths.length} ภาพ เข้าสู่สตูดิโอสารคดีเรียบร้อย!`);
+        }
+
+        function sendSingleImageToOrigin(imagePath, imageUrl) {
+            if (!window.originServerImagePaths) window.originServerImagePaths = [];
+            if (!window.originServerImagePaths.includes(imagePath)) {
+                window.originServerImagePaths.push(imagePath);
+            }
+            updateOriginAttachedPreview();
+            switchTab("origin");
+            showToast("➕ เพิ่มภาพเข้าสตูดิโอสารคดีแล้ว");
+        }
+
+        function updateOriginAttachedPreview(urls) {
+            const box = document.getElementById("origin-attached-images-box");
+            const thumbs = document.getElementById("origin-attached-thumbnails");
+            const countEl = document.getElementById("origin-attached-count");
+
+            if (!window.originServerImagePaths || window.originServerImagePaths.length === 0) {
+                box.classList.add("hidden");
+                return;
+            }
+
+            countEl.innerText = window.originServerImagePaths.length;
+            box.classList.remove("hidden");
+
+            thumbs.innerHTML = window.originServerImagePaths.map((p, idx) => {
+                let filename = p.split(/[\\/]/).pop();
+                let url = `/uploads/ai_images/${filename}`;
+                return `
+                    <div class="relative group w-14 h-20 rounded-lg overflow-hidden border border-amber-500/40 shadow">
+                        <img src="${url}" class="w-full h-full object-cover">
+                        <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[9px] text-amber-300 text-center font-bold">#${idx+1}</span>
+                    </div>
+                `;
+            }).join("");
+            lucide.createIcons();
+        }
+
+        function clearAttachedOriginImages() {
+            window.originServerImagePaths = [];
+            updateOriginAttachedPreview();
+            showToast("ล้างรูปภาพที่เลือกไว้เรียบร้อย");
+        }
+
+        async function startQueue() {
+            showToast("กำลังสั่งเริ่มการโพสต์คิว...");
+            await fetch("/api/queue/start", { method: "POST" });
+            fetchStatus();
+        }
+
+        async function stopQueue() {
+            showToast("กำลังสั่งหยุดคิว...");
+            await fetch("/api/queue/stop", { method: "POST" });
+            fetchStatus();
+        }
+
+        async function deleteItem(id) {
+            if (confirm("ต้องการลบคลิปนี้ออกจากคิวหรือไม่?")) {
+                await fetch(`/api/queue/${id}`, { method: "DELETE" });
+                loadQueue();
+                fetchStatus();
+            }
+        }
+
+        async function retryItem(id) {
+            await fetch(`/api/queue/retry/${id}`, { method: "POST" });
+            loadQueue();
+            fetchStatus();
+        }
+
+        async function clearCompleted() {
+            await fetch("/api/queue/clear_completed", { method: "POST" });
+            loadQueue();
+            fetchStatus();
+        }
+
+        function clearLogs() {
+            document.getElementById("logs-container").innerHTML = "";
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>"']/g, function(m) {
+                switch (m) {
+                    case '&': return '&amp;';
+                    case '<': return '&lt;';
+                    case '>': return '&gt;';
+                    case '"': return '&quot;';
+                    case "'": return '&#039;';
+                    default: return m;
+                }
+            });
+        }
+
+        // Live Log SSE Stream
+        function initLogStream() {
+            const evtSource = new EventSource("/api/logs/stream");
+            const container = document.getElementById("logs-container");
+
+            evtSource.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                const p = document.createElement("p");
+                
+                let colorClass = "text-slate-300";
+                if (data.level === "success") colorClass = "text-emerald-400 font-semibold";
+                if (data.level === "warning") colorClass = "text-amber-400";
+                if (data.level === "error") colorClass = "text-rose-400 font-semibold";
+                if (data.level === "info") colorClass = "text-sky-300";
+
+                p.className = colorClass;
+                p.innerHTML = `<span class="text-slate-600">[${escapeHtml(data.time)}]</span> ${escapeHtml(data.message)}`;
+                container.appendChild(p);
+                container.scrollTop = container.scrollHeight;
+                fetchStatus();
+            };
+
+            evtSource.onerror = function() {
+                console.log("SSE reconnecting...");
+            };
+        }
+
+        setInterval(() => {
+            fetchStatus();
+            loadQueue();
+        }, 3000);
+
+        fetchStatus();
+        loadQueue();
+        initLogStream();
+    </script>
+</body>
+</html>
